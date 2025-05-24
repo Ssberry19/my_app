@@ -5,7 +5,7 @@ import 'steps/physical_params_step.dart';
 import 'steps/goals_step.dart';
 import 'steps/cycles_step.dart';
 import 'steps/credentials_step.dart';
-import 'package:my_app/features/home/views/home_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class RegistrationFlow extends StatefulWidget {
   const RegistrationFlow({super.key});
@@ -77,13 +77,8 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
   void _completeRegistration() {
     // Здесь должна быть логика отправки данных на сервер
-  // После успешной регистрации переходим на главный экран
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => HomeScreen2(), // Ваш существующий HomeScreen
-    ),
-  );
+    // После успешной регистрации переходим на главный экран
+    context.pushReplacement('/main');
   }
 
   void _goNext() {

@@ -5,14 +5,14 @@ import 'package:my_app/features/diet/views/diet_screen.dart';
 import 'package:my_app/features/workouts/views/workouts_screen.dart';
 import 'package:my_app/features/tracker/views/tracker_screen.dart';
 
-class HomeScreen2 extends StatefulWidget {
-  const HomeScreen2({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeScreen2> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen2> {
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
