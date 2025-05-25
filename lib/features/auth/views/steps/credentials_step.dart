@@ -99,7 +99,6 @@ class _CredentialsStepState extends State<CredentialsStep> {
                       _formKey.currentState!.save();
                       widget.onNext();
                     // }
-                    
                   },
                   child: const Text('Завершить регистрацию'),
                 ),

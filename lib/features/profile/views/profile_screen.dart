@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // Import go_router
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -30,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildDietSection(),
               const SizedBox(height: 20),
-              _buildSettingsSection(),
+              _buildSettingsSection(context), // Pass context to settings section
             ],
           ),
         ),
@@ -62,16 +63,17 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsSection() {
+  // Modified to accept BuildContext
+  Widget _buildSettingsSection(BuildContext context) {
     return _buildSectionCard(
       title: 'Настройки',
       children: [
-        _buildListTile('О нас', Icons.info),
-        _buildListTile('Оцените нас', Icons.star),
-        _buildListTile('Свяжитесь с нами', Icons.mail),
-        _buildListTile('Управление подписками', Icons.subscriptions),
-        _buildListTile('Условия использования', Icons.description),
-        _buildListTile('Политика конфиденциальности', Icons.security),
+        _buildListTile('О нас', Icons.info, () => context.go('/welcome')), // Redirect to /welcome
+        _buildListTile('Оцените нас', Icons.star, () {}),
+        _buildListTile('Свяжитесь с нами', Icons.mail, () {}),
+        _buildListTile('Управление подписками', Icons.subscriptions, () {}),
+        _buildListTile('Условия использования', Icons.description, () {}),
+        _buildListTile('Политика конфиденциальности', Icons.security, () {}),
       ],
     );
   }
@@ -116,15 +118,16 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildListTile(String title, IconData icon) {
+  // Modified to accept a void callback for onTap
+  Widget _buildListTile(String title, IconData icon, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.deepPurple),
       title: Text(title, style: TextStyle(color: Colors.grey[700])),
-      trailing: Icon(Icons.arrow_forward_ios, 
-        size: 16, 
+      trailing: Icon(Icons.arrow_forward_ios,
+        size: 16,
         color: Colors.deepPurple[300]
       ),
-      onTap: () {}, // Добавьте навигацию здесь
+      onTap: onTap, // Assign the passed onTap callback
     );
   }
 }

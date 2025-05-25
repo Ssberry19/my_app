@@ -6,6 +6,7 @@ class PersonalInfoStep extends StatefulWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final int currentStepIndex; // Добавляем параметр
+  final VoidCallback onSaveAndContinue; // New callback for saving and continuing
 
   const PersonalInfoStep({
     super.key,
@@ -13,6 +14,7 @@ class PersonalInfoStep extends StatefulWidget {
     required this.onNext,
     required this.onBack,
     required this.currentStepIndex, // Получаем из родителя
+    required this.onSaveAndContinue, // Initialize the new callback
   });
 
   @override
@@ -22,7 +24,7 @@ class PersonalInfoStep extends StatefulWidget {
 class _PersonalInfoStepState extends State<PersonalInfoStep> {
   final _formKey = GlobalKey<FormState>();
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -31,12 +33,15 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
         child: Column(
           children: [
             TextFormField(
+              keyboardType: TextInputType.text,
+              initialValue: widget.data.fullName, // Pre-fill if data exists
               decoration: const InputDecoration(
                 labelText: 'ФИО',
                 hintText: 'Иванова Анна Сергеевна',
               ),
               validator: (value) {
                 if (value?.isEmpty ?? true) return 'Введите имя';
+                setState(() => widget.data.fullName = value);
                 return null;
               },
               onSaved: (value) => widget.data.fullName = value,
@@ -84,7 +89,6 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Используем переданный currentStepIndex
                 if (widget.currentStepIndex > 0)
                   ElevatedButton(
                     onPressed: widget.onBack,
@@ -94,6 +98,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
+                      // Просто переходим к следующему шагу, данные уже в widget.data
                       widget.onNext();
                     }
                   },
@@ -106,8 +111,6 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
       ),
     );
   }
-
-
 
   String _genderToString(Gender gender) {
     return {

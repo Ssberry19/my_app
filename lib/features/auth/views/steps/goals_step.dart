@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/registration_data.dart';
+import '../../models/registration_data.dart'; // Assuming this path
 
 class GoalsStep extends StatefulWidget {
   final RegistrationData data;
@@ -77,6 +77,24 @@ class _GoalsStepState extends State<GoalsStep> {
               onChanged: (value) {
                 widget.data.targetWeight = double.tryParse(value);
                 _calculateTargetBMI();
+                
+              },
+            ),
+            const SizedBox(height: 20),
+            // New Dropdown for Activity Level
+            DropdownButtonFormField<ActivityLevel>(
+              value: widget.data.activityLevel,
+              items: ActivityLevel.values.map((level) {
+                return DropdownMenuItem(
+                  value: level,
+                  child: Text(_activityLevelToString(level)),
+                );
+              }).toList(),
+              onChanged: (value) => setState(() => widget.data.activityLevel = value),
+              decoration: const InputDecoration(labelText: 'Уровень активности'),
+              validator: (value) {
+                if (value == null) return 'Выберите уровень активности';
+                return null;
               },
             ),
             const SizedBox(height: 20),
@@ -121,5 +139,15 @@ class _GoalsStepState extends State<GoalsStep> {
       FitnessGoal.gainWeight: 'Набор массы',
       FitnessGoal.cutting: 'Сушка',
     }[goal]!;
+  }
+
+  // Helper method to convert ActivityLevel enum to a display string
+  String _activityLevelToString(ActivityLevel level) {
+    return {
+      ActivityLevel.sedentary: 'Сидячий (минимум или отсутствие упражнений)',
+      ActivityLevel.light: 'Легкая активность (1-3 дня в неделю легких упражнений)',
+      ActivityLevel.moderate: 'Умеренная активность (3-5 дней в неделю умеренных упражнений)',
+      ActivityLevel.active: 'Очень активный (6-7 дней в неделю интенсивных упражнений)',
+    }[level]!;
   }
 }
