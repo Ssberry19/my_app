@@ -18,7 +18,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Трекер'), // Стиль берется из темы
+        title: const Text('Tracker'), // Стиль берется из темы
         // backgroundColor: Colors.deepPurple, // Удаляем
         // elevation: 0, // Удаляем
       ),
@@ -58,7 +58,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildSectionHeader(context, 'Календарь'), // Передаем context
+            _buildSectionHeader(context, 'Calendar'), // Передаем context
             const Divider(color: Colors.deepPurple), // Цвет из темы
             TableCalendar(
               firstDay: DateTime.utc(2020, 1, 1),
@@ -88,21 +88,28 @@ class _TrackerScreenState extends State<TrackerScreen> {
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
                   // ignore: deprecated_member_use
-                  color: Theme.of(context).primaryColor.withOpacity(0.2), // Цвет из темы
+                  color: Theme.of(
+                    context,
+                  ).primaryColor.withOpacity(0.2), // Цвет из темы
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: BoxDecoration(
                   color: Theme.of(context).primaryColor, // Цвет из темы
                   shape: BoxShape.circle,
                 ),
-                weekendTextStyle: TextStyle(color: Theme.of(context).colorScheme.error), // Цвет из темы
+                weekendTextStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                ), // Цвет из темы
                 // outsideDaysTextStyle: TextStyle(color: Colors.grey.shade400),
                 defaultTextStyle: Theme.of(context).textTheme.bodyMedium!,
               ),
               headerStyle: HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
-                titleTextStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).primaryColor), // Стиль и цвет из темы
+                titleTextStyle: Theme.of(context).textTheme.titleMedium!
+                    .copyWith(
+                      color: Theme.of(context).primaryColor,
+                    ), // Стиль и цвет из темы
                 // leftMakersAutoResizing: true, // Исправление
                 // rightMakersAutoResizing: true, // Исправление
               ),
@@ -120,7 +127,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildSectionHeader(context, 'Прогресс за неделю'), // Передаем context
+            _buildSectionHeader(context, 'Weekly Progress'), // Передаем context
             const Divider(color: Colors.deepPurple), // Цвет из темы
             SizedBox(
               height: 200,
@@ -130,7 +137,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   titlesData: FlTitlesData(show: false),
                   borderData: FlBorderData(
                     show: true,
-                    border: Border.all(color: Colors.deepPurple.shade100, width: 1), // Цвет из темы
+                    border: Border.all(
+                      color: Colors.deepPurple.shade100,
+                      width: 1,
+                    ), // Цвет из темы
                   ),
                   lineBarsData: [
                     LineChartBarData(
@@ -151,7 +161,9 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       belowBarData: BarAreaData(
                         show: true,
                         // ignore: deprecated_member_use
-                        color: Theme.of(context).primaryColor.withOpacity(0.2), // Цвет из темы
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withOpacity(0.2), // Цвет из темы
                       ),
                     ),
                   ],
@@ -171,12 +183,12 @@ class _TrackerScreenState extends State<TrackerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildSectionHeader(context, 'Заметки'), // Передаем context
+            _buildSectionHeader(context, 'Notes'), // Передаем context
             const Divider(color: Colors.deepPurple), // Цвет из темы
             TextFormField(
               maxLines: 4,
               decoration: const InputDecoration(
-                hintText: 'Добавьте свои заметки...',
+                hintText: 'Add your notes...',
                 // Остальные стили берутся из InputDecorationTheme в theme.dart
               ),
             ),
@@ -186,7 +198,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 // TODO: Save notes
               },
               // Стиль берется из ElevatedButtonThemeData в theme.dart
-              child: const Text('Сохранить заметку'),
+              child: const Text('Save note'),
             ),
           ],
         ),
@@ -201,11 +213,13 @@ class _TrackerScreenState extends State<TrackerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildSectionHeader(context, 'Мониторинг симптомов'), // Передаем context
+            _buildSectionHeader(
+              context,
+              'Symptom tracking',
+            ), // Передаем context
             const Divider(color: Colors.deepPurple), // Цвет из темы
-            _buildSymptomItem(context, 'Головная боль', Icons.healing),
-            _buildSymptomItem(context, 'Усталость', Icons.nightlight_round),
-            _buildSymptomItem(context, 'Сон', Icons.bedtime),
+            _buildSymptomItem(context, 'Headache', Icons.healing),
+            _buildSymptomItem(context, 'Fatigue', Icons.nightlight_round),
           ],
         ),
       ),
@@ -214,8 +228,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   Widget _buildSymptomItem(BuildContext context, String text, IconData icon) {
     return ListTile(
-      leading: Icon(icon, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
-      title: Text(text, style: Theme.of(context).textTheme.bodyLarge), // Стиль из темы
+      leading: Icon(
+        icon,
+        color: Theme.of(context).iconTheme.color,
+      ), // Цвет иконки из темы
+      title: Text(
+        text,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ), // Стиль из темы
       trailing: Switch(
         // activeColor: Colors.deepPurple, // Удаляем, берется из темы SwitchThemeData
         value: false, // You might want to manage this state
@@ -229,7 +249,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Row(
       children: [
-        Icon(Icons.insights, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
+        Icon(
+          Icons.insights,
+          color: Theme.of(context).iconTheme.color,
+        ), // Цвет иконки из темы
         const SizedBox(width: 8),
         Text(
           title,

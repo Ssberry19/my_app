@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class ProgressChart extends StatelessWidget {
   const ProgressChart({super.key});
@@ -11,8 +11,10 @@ class ProgressChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Прогресс за неделю', 
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Weekly Progress',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 16),
             Container(
               height: 200,
@@ -20,7 +22,7 @@ class ProgressChart extends StatelessWidget {
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(child: Text('График будет здесь')),
+              child: const Center(child: Text('The chart will be here')),
             ),
           ],
         ),

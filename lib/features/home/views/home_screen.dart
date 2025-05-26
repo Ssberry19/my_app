@@ -27,12 +27,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Главная'), // Стиль берется из темы
+        title: const Text('Home'), // Стиль берется из темы
         // backgroundColor: Colors.deepPurple, // Удаляем
         // elevation: 0, // Удаляем
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none, color: Theme.of(context).appBarTheme.foregroundColor), // Цвет иконки из темы
+            icon: Icon(
+              Icons.notifications_none,
+              color: Theme.of(context).appBarTheme.foregroundColor,
+            ), // Цвет иконки из темы
             onPressed: () {
               // TODO: Handle notifications
             },
@@ -58,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Добро пожаловать!',
+              'Welcome!',
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                 color: Theme.of(context).primaryColor,
               ), // Стиль из темы
@@ -66,17 +69,32 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             _buildSectionCard(
               context,
-              title: 'Статистика',
+              title: 'Statistics',
               children: [
-                _buildMetricRow(context, 'Калории сегодня', '$_caloriesToday / $_targetCalories ккал', Icons.local_fire_department),
-                _buildMetricRow(context, 'Тренировки', '$_completedWorkouts / $_totalWorkouts завершено', Icons.fitness_center),
-                _buildMetricRow(context, 'Вода', '${_waterIntakeMl / 1000} / ${_waterTargetMl / 1000} л', Icons.water_drop),
+                _buildMetricRow(
+                  context,
+                  'Calories Today',
+                  '$_caloriesToday / $_targetCalories kcal',
+                  Icons.local_fire_department,
+                ),
+                _buildMetricRow(
+                  context,
+                  'Workouts',
+                  '$_completedWorkouts / $_totalWorkouts completed',
+                  Icons.fitness_center,
+                ),
+                _buildMetricRow(
+                  context,
+                  'Water',
+                  '${_waterIntakeMl / 1000} / ${_waterTargetMl / 1000} л',
+                  Icons.water_drop,
+                ),
               ],
             ),
             const SizedBox(height: 20),
             _buildSectionCard(
               context,
-              title: 'Прогресс',
+              title: 'Progress',
               children: [
                 _buildProgressChart(context),
                 const SizedBox(height: 16),
@@ -86,10 +104,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const TrackerScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const TrackerScreen(),
+                        ),
                       );
                     },
-                    child: const Text('Посмотреть подробнее'), // Стиль из темы
+                    child: const Text('View more details'), // Стиль из темы
                   ),
                 ),
               ],
@@ -97,20 +117,30 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             _buildSectionCard(
               context,
-              title: 'Рекомендации',
+              title: 'Recommendations',
               children: [
-                _buildRecommendationItem(context, 'Попробуйте новый рецепт из раздела "Диета"!', Icons.restaurant_menu),
-                _buildRecommendationItem(context, 'Добавьте в свой план новую тренировку!', Icons.directions_run),
+                _buildRecommendationItem(
+                  context,
+                  'Try a new recipe from the "Diet" section!',
+                  Icons.restaurant_menu,
+                ),
+                _buildRecommendationItem(
+                  context,
+                  'Add a new workout to your plan!',
+                  Icons.directions_run,
+                ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const DietScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const DietScreen(),
+                        ),
                       );
                     },
-                    child: const Text('Больше рекомендаций'), // Стиль из темы
+                    child: const Text('More recommendations'), // Стиль из темы
                   ),
                 ),
               ],
@@ -123,7 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionCard(BuildContext context, {required String title, required List<Widget> children}) {
+  Widget _buildSectionCard(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+  }) {
     // Card автоматически возьмет стиль из theme.dart
     return Card(
       child: Padding(
@@ -133,7 +167,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge, // Использование стиля из темы
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge, // Использование стиля из темы
             ),
             const Divider(color: Colors.deepPurple), // Цвет из темы
             ...children,
@@ -143,12 +179,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMetricRow(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildMetricRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
+          Icon(
+            icon,
+            color: Theme.of(context).iconTheme.color,
+          ), // Цвет иконки из темы
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -158,7 +202,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor), // Стиль и цвет из темы
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).primaryColor,
+            ), // Стиль и цвет из темы
           ),
         ],
       ),
@@ -174,7 +221,10 @@ class _HomeScreenState extends State<HomeScreen> {
           titlesData: FlTitlesData(show: false),
           borderData: FlBorderData(
             show: true,
-            border: Border.all(color: Colors.deepPurple.shade100, width: 1), // Цвет из темы
+            border: Border.all(
+              color: Colors.deepPurple.shade100,
+              width: 1,
+            ), // Цвет из темы
           ),
           lineBarsData: [
             LineChartBarData(
@@ -195,7 +245,9 @@ class _HomeScreenState extends State<HomeScreen> {
               belowBarData: BarAreaData(
                 show: true,
                 // ignore: deprecated_member_use
-                color: Theme.of(context).primaryColor.withOpacity(0.2), // Цвет из темы
+                color: Theme.of(
+                  context,
+                ).primaryColor.withOpacity(0.2), // Цвет из темы
               ),
             ),
           ],
@@ -204,13 +256,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRecommendationItem(BuildContext context, String text, IconData icon) {
+  Widget _buildRecommendationItem(
+    BuildContext context,
+    String text,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Theme.of(context).hintColor), // Использование hintColor для разнообразия
+          Icon(
+            icon,
+            color: Theme.of(context).hintColor,
+          ), // Использование hintColor для разнообразия
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -227,19 +286,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildActionButton(context, 'Диета', Icons.restaurant_menu, () {
+        _buildActionButton(context, 'Diet', Icons.restaurant_menu, () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const DietScreen()),
           );
         }),
-        _buildActionButton(context, 'Тренировки', Icons.fitness_center, () {
+        _buildActionButton(context, 'Workouts', Icons.fitness_center, () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const WorkoutPlanPage()),
           );
         }),
-        _buildActionButton(context, 'Трекер', Icons.show_chart, () {
+        _buildActionButton(context, 'Tracker', Icons.show_chart, () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const TrackerScreen()),
@@ -249,7 +308,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildActionButton(BuildContext context, String label, IconData icon, VoidCallback onPressed) {
+  Widget _buildActionButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
     return Column(
       children: [
         FloatingActionButton(
@@ -262,7 +326,10 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 8),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w500, color: Theme.of(context).primaryColor), // Стиль и цвет из темы
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).primaryColor,
+          ), // Стиль и цвет из темы
         ),
       ],
     );

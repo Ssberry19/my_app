@@ -37,26 +37,17 @@ class _MainScreenState extends State<MainScreen> {
         // unselectedItemColor: Colors.blueGrey, // Удалить эту строку
         showUnselectedLabels: true,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Главная',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
-            label: 'Диета',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: 'Diet'),
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
-            label: 'Трекер',
+            label: 'Tracker',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center),
-            label: 'Тренировки',
+            label: 'Workouts',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Профиль',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

@@ -20,20 +20,15 @@ final _router = GoRouter(
       path: '/register',
       builder: (context, state) => const RegistrationFlow(),
     ),
-    GoRoute(
-      path: '/main',
-      builder: (context, state) => const MainScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
+    GoRoute(path: '/main', builder: (context, state) => const MainScreen()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     // ... другие экраны
   ],
   errorBuilder: (context, state) {
     // Используем Scaffold, AppBar и ElevatedButton из темы
     return Scaffold(
-      appBar: AppBar( // Стиль AppBar берется из темы
+      appBar: AppBar(
+        // Стиль AppBar берется из темы
         title: Text(
           'Page Not Found',
           // Не нужно устанавливать style: TextStyle(color: Colors.white) здесь,
@@ -46,14 +41,19 @@ final _router = GoRouter(
           children: [
             Text(
               'GoException: ${state.error.toString()}',
-              style: Theme.of(context).textTheme.bodyLarge, // Используем стиль из темы
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge, // Используем стиль из темы
             ),
             const SizedBox(height: 20),
-            ElevatedButton( // Стиль ElevatedButton берется из темы
+            ElevatedButton(
+              // Стиль ElevatedButton берется из темы
               onPressed: () {
                 context.go('/welcome'); // Переходим на страницу Welcome
               },
-              child: const Text('Home'), // Текст кнопки стилизуется из theme.dart
+              child: const Text(
+                'Home',
+              ), // Текст кнопки стилизуется из theme.dart
             ),
           ],
         ),
