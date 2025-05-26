@@ -20,8 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final int _totalWorkouts = 5;
   final int _waterIntakeMl = 1500;
   final int _waterTargetMl = 2000;
-  final double _sleepHours = 7.5;
-  final double _sleepTargetHours = 8.0;
 
   @override
   Widget build(BuildContext context) {
