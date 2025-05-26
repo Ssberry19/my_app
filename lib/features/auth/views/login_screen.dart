@@ -37,10 +37,15 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         context.go('/home'); // Перенаправление при успехе
       } else {
-        setState(() => _errorMessage = 'Ошибка авторизации. Проверьте данные');
+        setState(() => _errorMessage = 'Authentication failed');
+        if (response.statusCode == 400) {
+          setState(() => _errorMessage = 'Wrong email or password');
+        } else {
+          setState(() => _errorMessage = 'Server error: ${response.statusCode}');
+        }
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Ошибка соединения');
+      setState(() => _errorMessage = 'Connection error: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -49,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Вход')),
+      appBar: AppBar(title: const Text('Log in')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -61,15 +66,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) => value?.isEmpty ?? true
-                    ? 'Введите email'
+                    ? 'Enter your email'
                     : null,
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Пароль'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 validator: (value) => value?.isEmpty ?? true
-                    ? 'Введите пароль'
+                    ? 'Enter your password'
                     : null,
               ),
               if (_errorMessage != null)
@@ -84,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _login,
-                      child: const Text('Войти'),
+                      child: const Text('Log in'),
                     ),
             ],
           ),

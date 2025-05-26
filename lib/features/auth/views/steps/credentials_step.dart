@@ -39,9 +39,9 @@ class _CredentialsStepState extends State<CredentialsStep> {
                 hintText: 'example@mail.com',
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Введите email';
+                if (value?.isEmpty ?? true) return 'Enter your email';
                 if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
-                  return 'Неверный формат email';
+                  return 'Wrong format of email';
                 }
                 return null;
               },
@@ -51,7 +51,7 @@ class _CredentialsStepState extends State<CredentialsStep> {
             TextFormField(
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: 'Пароль',
+                labelText: 'Password',
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword
                       ? Icons.visibility_off
@@ -60,8 +60,12 @@ class _CredentialsStepState extends State<CredentialsStep> {
                 ),
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Введите пароль';
-                if (value!.length < 8) return 'Минимум 8 символов';
+                if (value?.isEmpty ?? true) return 'Enter your password';
+                if (value!.length < 8) return 'Minimum 8 characters required';
+                if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$')
+                    .hasMatch(value)) {
+                  return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+                }
                 return null;
               },
               onSaved: (value) => widget.data.password = value,
@@ -70,7 +74,8 @@ class _CredentialsStepState extends State<CredentialsStep> {
             TextFormField(
               obscureText: _obscureConfirm,
               decoration: InputDecoration(
-                labelText: 'Подтвердите пароль',
+                labelText: 'Confirm Password',
+                hintText: 'Re-enter your password',
                 suffixIcon: IconButton(
                   icon: Icon(_obscureConfirm
                       ? Icons.visibility_off
@@ -80,7 +85,7 @@ class _CredentialsStepState extends State<CredentialsStep> {
               ),
               validator: (value) {
                 if (value != widget.data.password) {
-                  return 'Пароли не совпадают';
+                  return 'Passwords do not match';
                 }
                 return null;
               },
@@ -91,7 +96,7 @@ class _CredentialsStepState extends State<CredentialsStep> {
               children: [
                 ElevatedButton(
                   onPressed: widget.onBack,
-                  child: const Text('Назад'),
+                  child: const Text('Back'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -100,7 +105,7 @@ class _CredentialsStepState extends State<CredentialsStep> {
                       widget.onNext();
                     // }
                   },
-                  child: const Text('Завершить регистрацию'),
+                  child: const Text('Complete Registration'),
                 ),
               ],
             ),

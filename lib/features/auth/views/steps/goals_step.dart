@@ -55,9 +55,9 @@ class _GoalsStepState extends State<GoalsStep> {
                 );
               }).toList(),
               onChanged: (value) => setState(() => widget.data.goal = value),
-              decoration: const InputDecoration(labelText: 'Цель'),
+              decoration: const InputDecoration(labelText: 'Goal'),
               validator: (value) {
-                if (value == null) return 'Выберите цель';
+                if (value == null) return 'Choose a goal';
                 return null;
               },
             ),
@@ -65,13 +65,20 @@ class _GoalsStepState extends State<GoalsStep> {
             TextFormField(
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Целевой вес (кг)',
+                labelText: 'Goal Weight (kg)',
                 hintText: '60',
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Введите вес';
+                if (value?.isEmpty ?? true) return 'Enter target weight';
+                if (widget.data.goal == FitnessGoal.loseWeight && widget.data.weight != null) {
+                  final currentWeight = widget.data.weight!;
+                  final targetWeight = double.tryParse(value!);
+                  if (targetWeight == null || targetWeight >= currentWeight) {
+                    return 'Target weight must be less than current weight for weight loss goal';
+                  }
+                }
                 final parsed = double.tryParse(value!);
-                if (parsed == null || parsed <= 0) return 'Неверный формат';
+                if (parsed == null || parsed <= 0) return 'Wrong format';
                 return null;
               },
               onChanged: (value) {
@@ -91,16 +98,16 @@ class _GoalsStepState extends State<GoalsStep> {
                 );
               }).toList(),
               onChanged: (value) => setState(() => widget.data.activityLevel = value),
-              decoration: const InputDecoration(labelText: 'Уровень активности'),
+              decoration: const InputDecoration(labelText: 'Activity Level'),
               validator: (value) {
-                if (value == null) return 'Выберите уровень активности';
+                if (value == null) return 'Choose an activity level';
                 return null;
               },
             ),
             const SizedBox(height: 20),
             if (_targetBMI != null)
               Text(
-                'ИМТ при целевом весе: ${_targetBMI!.toStringAsFixed(1)}',
+                'BMI in goal weight: ${_targetBMI!.toStringAsFixed(1)}',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -113,7 +120,7 @@ class _GoalsStepState extends State<GoalsStep> {
               children: [
                 ElevatedButton(
                   onPressed: widget.onBack,
-                  child: const Text('Назад'),
+                  child: const Text('Back'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -122,7 +129,7 @@ class _GoalsStepState extends State<GoalsStep> {
                       widget.onNext();
                     }
                   },
-                  child: const Text('Далее'),
+                  child: const Text('Next'),
                 ),
               ],
             ),
@@ -134,20 +141,21 @@ class _GoalsStepState extends State<GoalsStep> {
 
   String _goalToString(FitnessGoal goal) {
     return {
-      FitnessGoal.loseWeight: 'Похудение',
-      FitnessGoal.maintain: 'Поддержание веса',
-      FitnessGoal.gainWeight: 'Набор массы',
-      FitnessGoal.cutting: 'Сушка',
+      FitnessGoal.loseWeight: 'Lose Weight',
+      FitnessGoal.maintain: 'Maintain Weight',
+      FitnessGoal.gainWeight: 'Gain Weight',
+      FitnessGoal.cutting: 'Build Muscle',
     }[goal]!;
   }
 
   // Helper method to convert ActivityLevel enum to a display string
   String _activityLevelToString(ActivityLevel level) {
     return {
-      ActivityLevel.sedentary: 'Сидячий (минимум или отсутствие упражнений)',
-      ActivityLevel.light: 'Легкая активность (1-3 дня в неделю легких упражнений)',
-      ActivityLevel.moderate: 'Умеренная активность (3-5 дней в неделю умеренных упражнений)',
-      ActivityLevel.active: 'Очень активный (6-7 дней в неделю интенсивных упражнений)',
+      ActivityLevel.sedentary: 'Sedentary (little or no exercise)',
+      ActivityLevel.light: 'Lightly active (1-3 days a week of light exercise)',
+      ActivityLevel.moderate: 'Moderately active (3-5 days a week of moderate exercise)',
+      ActivityLevel.active: 'Active (6-7 days a week of vigorous exercise)',
+      ActivityLevel.veryActive: 'Extra active (twice a day or heavy physical job)',
     }[level]!;
   }
 }

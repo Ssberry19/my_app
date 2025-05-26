@@ -49,13 +49,13 @@ class _PhysicalParamsStepState extends State<PhysicalParamsStep> {
             TextFormField(
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Рост (см)',
+                labelText: 'Height (cm)',
                 hintText: '175',
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Введите рост';
+                if (value?.isEmpty ?? true) return 'Enter height';
                 final parsed = double.tryParse(value!);
-                if (parsed == null || parsed <= 0) return 'Неверный формат';
+                if (parsed == null || parsed <= 0) return 'Invalid format';
                 return null;
               },
               onChanged: (value) {
@@ -67,13 +67,13 @@ class _PhysicalParamsStepState extends State<PhysicalParamsStep> {
             TextFormField(
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Вес (кг)',
+                labelText: 'Weight (kg)',
                 hintText: '65',
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Введите вес';
+                if (value?.isEmpty ?? true) return 'Enter weight';
                 final parsed = double.tryParse(value!);
-                if (parsed == null || parsed <= 0) return 'Неверный формат';
+                if (parsed == null || parsed <= 0) return 'Invalid format';
                 return null;
               },
               onChanged: (value) {
@@ -84,7 +84,7 @@ class _PhysicalParamsStepState extends State<PhysicalParamsStep> {
             const SizedBox(height: 20),
             if (_currentBMI != null)
               Text(
-                'Текущий ИМТ: ${_currentBMI!.toStringAsFixed(1)}',
+                'Current BMI: ${_currentBMI!.toStringAsFixed(1)}',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -98,7 +98,7 @@ class _PhysicalParamsStepState extends State<PhysicalParamsStep> {
                 if (widget.currentStepIndex > 0)
                   ElevatedButton(
                     onPressed: widget.onBack,
-                    child: const Text('Назад'),
+                    child: const Text('Back'),
                   ),
                 ElevatedButton(
                   onPressed: () {
@@ -107,7 +107,7 @@ class _PhysicalParamsStepState extends State<PhysicalParamsStep> {
                       widget.onNext();
                     }
                   },
-                  child: const Text('Далее'),
+                  child: const Text('Next'),
                 ),
               ],
             ),

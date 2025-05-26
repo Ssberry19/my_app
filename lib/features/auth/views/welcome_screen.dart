@@ -12,18 +12,18 @@ class WelcomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Добро пожаловать!',
+              'Welcome!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => context.go('/register'),
-              child: const Text('Создать аккаунт'),
+              child: const Text('Create Account'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => context.go('/login'),
-              child: const Text('Войти'),
+              child: const Text('Log in'),
             ),
           ],
         ),

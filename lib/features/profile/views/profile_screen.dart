@@ -54,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
     title: 'Аккаунт',
     children: [
       _buildProfileRow(context, 'Имя пользователя', 'tami_insa', Icons.account_circle), // Иконка человека/аккаунта
-      _buildProfileRow(context, 'Email', '220698@astanait.edu.kz', Icons.email), // Иконка конверта
+      _buildProfileRow(context, 'Email', 'tahinii@mail.ru', Icons.email), // Иконка конверта
       _buildProfileRow(context, 'Дата рождения', '30/10/2003', Icons.calendar_today), // Иконка календаря
       _buildProfileRow(context, 'Пол', 'Женский', Icons.wc), // Иконка мужского/женского туалета (или generic 'person_2' если wc не подходит)
       _buildProfileRow(context, 'Вес', '75', Icons.scale), // Иконка весов

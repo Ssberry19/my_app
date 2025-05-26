@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../models/workout_request.dart'; // Убедитесь, что путь верен
 import '../models/workout_response.dart'; // Убедитесь, что путь верен
 
@@ -18,13 +17,13 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
 
   // Примерные данные для отправки, как в вашем запросе
   final WorkoutRequest _requestData = WorkoutRequest(
-    heightCm: 170,
-    weightKg: 60,
-    age: 18,
+    heightCm: 175,
+    weightKg: 75,
+    age: 21,
     gender: "female",
     goal: "weight_loss",
     menstrualPhase: "luteal",
-    bodyFatPercentage: 26.1,
+    bodyFatPercentage: 18.0,
     days: 7,
   );
 
@@ -61,7 +60,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
     } catch (e) {
       // Ошибка сети (например, сервер недоступен)
       setState(() {
-        _errorMessage = 'Не удалось подключиться к серверу: $e';
+        _errorMessage = 'Could not connect to server: $e';
       });
     } finally {
       setState(() {
@@ -80,7 +79,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('План Тренировок'),
+        title: const Text('Weekly Workout Plan'),
         backgroundColor: Colors.deepPurple,
       ),
       body: _isLoading
@@ -95,21 +94,21 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         Icon(Icons.error_outline, color: Colors.red, size: 60),
                         SizedBox(height: 10),
                         Text(
-                          'Ошибка загрузки: $_errorMessage',
+                          'Loading error: $_errorMessage',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.red, fontSize: 16),
                         ),
                         SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: _fetchWorkoutPlan,
-                          child: const Text('Повторить попытку'),
+                          child: const Text('Retry'),
                         ),
                       ],
                     ),
                   ),
                 )
               : _workoutResponse == null
-                  ? const Center(child: Text('Нет данных для отображения.'))
+                  ? const Center(child: Text('No workout plan available'))
                   : _buildWorkoutPlanDisplay(_workoutResponse!),
     );
   }
@@ -120,12 +119,12 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoCard('Статус', response.status, Colors.green),
-          _buildInfoCard('BMI Категория', response.bmiCase, Colors.blue),
-          _buildInfoCard('BFP Категория', response.bfpCase, Colors.teal),
+          _buildInfoCard('Status', response.status, Colors.green),
+          _buildInfoCard('BMI Category', response.bmiCase, Colors.blue),
+          _buildInfoCard('BFP Category', response.bfpCase, Colors.teal),
           const SizedBox(height: 20),
           const Text(
-            'Ваш План Тренировок:',
+            'Your workout plan:',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
@@ -170,7 +169,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'День ${dayPlan.day}: ${dayPlan.workoutName}',
+              'Day ${dayPlan.day}: ${dayPlan.workoutName}',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
             ),
             const SizedBox(height: 8),
@@ -198,12 +197,12 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          Text('Подходы: ${exercise.sets}, Повторения: ${exercise.reps}'),
-          Text('Цель: ${exercise.target}'),
-          Text('Заметки: ${exercise.notes}'),
-          Text('Сожжено калорий: ${exercise.caloriesBurned.toStringAsFixed(2)}'),
+          Text('Sets: ${exercise.sets}, Reps: ${exercise.reps}'),
+          Text('Goal: ${exercise.target}'),
+          Text('Notes: ${exercise.notes}'),
+          Text('Calories Burned: ${exercise.caloriesBurned.toStringAsFixed(2)}'),
           if (exercise.caloriesBurned == 0) // Пример выделения
-            Text(' (Значение 0.00 может указывать на placeholder)', style: TextStyle(color: Colors.orange)),
+            Text(' (Value 0.00 may show on placeholder)', style: TextStyle(color: Colors.orange)),
           const SizedBox(height: 8),
         ],
       ),

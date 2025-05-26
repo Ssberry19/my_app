@@ -36,11 +36,11 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
               keyboardType: TextInputType.text,
               initialValue: widget.data.fullName, // Pre-fill if data exists
               decoration: const InputDecoration(
-                labelText: 'ФИО',
-                hintText: 'Иванова Анна Сергеевна',
+                labelText: 'Username',
+                hintText: 'ssberry19',
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Введите имя';
+                if (value?.isEmpty ?? true) return 'Enter name';
                 setState(() => widget.data.fullName = value);
                 return null;
               },
@@ -59,9 +59,9 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                 setState(() => widget.data.gender = value);
                 widget.data.notify(); // Уведомляем об изменении
               },
-              decoration: const InputDecoration(labelText: 'Пол'),
+              decoration: const InputDecoration(labelText: 'Gander'),
               validator: (value) {
-                if (value == null) return 'Выберите пол';
+                if (value == null) return 'Choose gender';
                 return null;
               },
             ),
@@ -69,8 +69,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
             ListTile(
               title: Text(
                 widget.data.birthDate == null
-                    ? 'Выберите дату рождения'
-                    : 'Дата рождения: ${_formatDate(widget.data.birthDate!)}',
+                    ? 'Choose birth date'
+                    : 'Birth Date: ${_formatDate(widget.data.birthDate!)}',
               ),
               trailing: const Icon(Icons.calendar_today),
               onTap: () async {
@@ -92,7 +92,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                 if (widget.currentStepIndex > 0)
                   ElevatedButton(
                     onPressed: widget.onBack,
-                    child: const Text('Назад'),
+                    child: const Text('Back'),
                   ),
                 ElevatedButton(
                   onPressed: () {
@@ -102,7 +102,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       widget.onNext();
                     }
                   },
-                  child: const Text('Далее'),
+                  child: const Text('Next'),
                 )
               ],
             ),
@@ -114,8 +114,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
   String _genderToString(Gender gender) {
     return {
-      Gender.male: 'Мужской',
-      Gender.female: 'Женский',
+      Gender.male: 'Male',
+      Gender.female: 'Female',
     }[gender]!;
   }
 

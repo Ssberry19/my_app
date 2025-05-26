@@ -163,13 +163,13 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
         if (response.statusCode == 200 || response.statusCode == 201) {
           print('Registration successful: ${response.body}');
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Регистрация успешно завершена!')),
+            const SnackBar(content: Text('Registration is done succesfully!')),
           );
           context.go('/main'); // Переходим на главный экран после успешной регистрации
         } else {
           print('Registration failed: ${response.statusCode} - ${response.body}');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ошибка регистрации: ${response.body}')),
+            SnackBar(content: Text('Registration Error: ${response.body}')),
           );
         }
       }
@@ -177,7 +177,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       print('Error during registration: $e');
       if (mounted) { // Проверяем, что виджет все еще находится в дереве
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Произошла ошибка при регистрации: $e')),
+          SnackBar(content: Text('There is an error during the proccess of registration: $e')),
         );
       }
     }

@@ -40,7 +40,7 @@ class _CyclesStepState extends State<CyclesStep> {
       child: Column(
         children: [
           const Text(
-            'Отметьте даты последних 3 циклов',
+            'Enter three last dates of your menstrual cycles',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
@@ -85,7 +85,7 @@ class _CyclesStepState extends State<CyclesStep> {
             children: [
               ElevatedButton(
                 onPressed: widget.onBack,
-                child: const Text('Назад'),
+                child: const Text('Back'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -94,12 +94,12 @@ class _CyclesStepState extends State<CyclesStep> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Пожалуйста, отметьте минимум 3 цикла'),
+                        content: Text('Please select at least 3 dates.'),
                       ),
                     );
                   }
                 },
-                child: const Text('Далее'),
+                child: const Text('Next'),
               ),
             ],
           ),
