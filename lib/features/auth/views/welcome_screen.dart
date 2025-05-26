@@ -17,11 +17,13 @@ class WelcomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Переход на регистрацию через go_router
-                context.go('/register');
-              },
+              onPressed: () => context.go('/register'),
               child: const Text('Создать аккаунт'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => context.go('/login'),
+              child: const Text('Войти'),
             ),
           ],
         ),
