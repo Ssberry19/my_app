@@ -8,7 +8,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Профиль'), // Стиль берется из темы
+        title: const Text('Profile'), // Стиль берется из темы
         // backgroundColor: Colors.deepPurple, // Удаляем
         // elevation: 0, // Удаляем
       ),
@@ -40,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
                 context.go('/welcome'); // Example navigation to WelcomeScreen
               },
               // Стиль берется из ElevatedButtonThemeData в theme.dart
-              child: const Text('Выйти'),
+              child: const Text('Logout'),
             ),
           ],
         ),
@@ -48,30 +48,76 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
- Widget _buildAccountSection(BuildContext context) {
-  return _buildSectionCard(
-    context,
-    title: 'Аккаунт',
-    children: [
-      _buildProfileRow(context, 'Имя пользователя', 'tami_insa', Icons.account_circle), // Иконка человека/аккаунта
-      _buildProfileRow(context, 'Email', 'tahinii@mail.ru', Icons.email), // Иконка конверта
-      _buildProfileRow(context, 'Дата рождения', '30/10/2003', Icons.calendar_today), // Иконка календаря
-      _buildProfileRow(context, 'Пол', 'Женский', Icons.wc), // Иконка мужского/женского туалета (или generic 'person_2' если wc не подходит)
-      _buildProfileRow(context, 'Вес', '75', Icons.scale), // Иконка весов
-      _buildProfileRow(context, 'Рост', '175', Icons.height), // Иконка роста/линейки
-      _buildProfileRow(context, 'Уровень активности', 'сидячий', Icons.directions_run), // Иконка бегущего человека
-      _buildProfileRow(context, 'Целевой вес', '65', Icons.track_changes), // Иконка цели/мишени
-    ],
-  );
-}
+  Widget _buildAccountSection(BuildContext context) {
+    return _buildSectionCard(
+      context,
+      title: 'Аккаунт',
+      children: [
+        _buildProfileRow(
+          context,
+          'Username',
+          'tami_insa',
+          Icons.account_circle,
+        ), // Иконка человека/аккаунта
+        _buildProfileRow(
+          context,
+          'Email',
+          '220698@astanait.edu.kz',
+          Icons.email,
+        ), // Иконка конверта
+        _buildProfileRow(
+          context,
+          'Date of Birth',
+          '30/10/2003',
+          Icons.calendar_today,
+        ), // Иконка календаря
+        _buildProfileRow(
+          context,
+          'Gender',
+          'Female',
+          Icons.wc,
+        ), // Иконка мужского/женского туалета (или generic 'person_2' если wc не подходит)
+        _buildProfileRow(context, 'Weight', '75', Icons.scale), // Иконка весов
+        _buildProfileRow(
+          context,
+          'Height',
+          '175',
+          Icons.height,
+        ), // Иконка роста/линейки
+        _buildProfileRow(
+          context,
+          'Activity Level',
+          'Sedentary',
+          Icons.directions_run,
+        ), // Иконка бегущего человека
+        _buildProfileRow(
+          context,
+          'Goal Weight',
+          '65',
+          Icons.track_changes,
+        ), // Иконка цели/мишени
+      ],
+    );
+  }
+
   Widget _buildDietSection(BuildContext context) {
     return _buildSectionCard(
       context,
-      title: 'Диета',
+      title: 'Diet',
       children: [
-        _buildProfileRow(context, 'Цель', 'Сброс веса', Icons.flag),
-        _buildProfileRow(context, 'Калории в день', '2056 ккал', Icons.local_fire_department),
-        _buildProfileRow(context, 'Ограничения/аллергия', 'отсутсвует', Icons.restaurant),
+        _buildProfileRow(context, 'Goal', 'Weigh Loss', Icons.flag),
+        _buildProfileRow(
+          context,
+          'Daily calories',
+          '2056 kcal',
+          Icons.local_fire_department,
+        ),
+        _buildProfileRow(
+          context,
+          'Restrictions/Allergies',
+          'none',
+          Icons.restaurant,
+        ),
       ],
     );
   }
@@ -79,22 +125,26 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildSettingsSection(BuildContext context) {
     return _buildSectionCard(
       context,
-      title: 'Настройки',
+      title: 'Settings',
       children: [
-        _buildListTile(context, 'Уведомления', Icons.notifications, () {
+        _buildListTile(context, 'Notifications', Icons.notifications, () {
           // TODO: Navigate to notification settings
         }),
-        _buildListTile(context, 'Язык', Icons.language, () {
+        _buildListTile(context, 'Language', Icons.language, () {
           // TODO: Change language
         }),
-        _buildListTile(context, 'Помощь и поддержка', Icons.help_outline, () {
+        _buildListTile(context, 'Support', Icons.help_outline, () {
           // TODO: Open help section
         }),
       ],
     );
   }
 
-  Widget _buildSectionCard(BuildContext context, {required String title, required List<Widget> children}) {
+  Widget _buildSectionCard(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+  }) {
     // Card автоматически возьмет стиль из theme.dart
     return Card(
       // color: Colors.white.withOpacity(0.9), // Удаляем, берется из темы
@@ -109,7 +159,9 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge, // Использование стиля из темы
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge, // Использование стиля из темы
             ),
             const Divider(color: Colors.deepPurple), // Цвет из темы
             ...children,
@@ -119,10 +171,21 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileRow(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildProfileRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return ListTile(
-      leading: Icon(icon, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
-      title: Text(label, style: Theme.of(context).textTheme.bodyLarge), // Стиль из темы
+      leading: Icon(
+        icon,
+        color: Theme.of(context).iconTheme.color,
+      ), // Цвет иконки из темы
+      title: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ), // Стиль из темы
       trailing: Text(
         value,
         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -134,11 +197,26 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Modified to accept a void callback for onTap
-  Widget _buildListTile(BuildContext context, String title, IconData icon, VoidCallback onTap) {
+  Widget _buildListTile(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return ListTile(
-      leading: Icon(icon, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
-      title: Text(title, style: Theme.of(context).textTheme.bodyLarge), // Стиль из темы
-      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
+      leading: Icon(
+        icon,
+        color: Theme.of(context).iconTheme.color,
+      ), // Цвет иконки из темы
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ), // Стиль из темы
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: Theme.of(context).iconTheme.color,
+      ), // Цвет иконки из темы
       onTap: onTap,
     );
   }

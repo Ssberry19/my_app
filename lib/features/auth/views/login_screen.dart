@@ -41,7 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
         if (response.statusCode == 400) {
           setState(() => _errorMessage = 'Wrong email or password');
         } else {
-          setState(() => _errorMessage = 'Server error: ${response.statusCode}');
+          setState(
+            () => _errorMessage = 'Server error: ${response.statusCode}',
+          );
         }
       }
     } catch (e) {
@@ -65,17 +67,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) => value?.isEmpty ?? true
-                    ? 'Enter your email'
-                    : null,
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Enter your email' : null,
               ),
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
-                validator: (value) => value?.isEmpty ?? true
-                    ? 'Enter your password'
-                    : null,
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Enter your password' : null,
               ),
               if (_errorMessage != null)
                 Padding(
