@@ -53,14 +53,14 @@ class ProfileScreen extends StatelessWidget {
     context,
     title: 'Аккаунт',
     children: [
-      _buildProfileRow(context, 'Имя пользователя', 'fitness_user', Icons.account_circle), // Иконка человека/аккаунта
-      _buildProfileRow(context, 'Email', 'user@example.com', Icons.email), // Иконка конверта
-      _buildProfileRow(context, 'Дата рождения', '********', Icons.calendar_today), // Иконка календаря
-      _buildProfileRow(context, 'Пол', '********', Icons.wc), // Иконка мужского/женского туалета (или generic 'person_2' если wc не подходит)
-      _buildProfileRow(context, 'Вес', '********', Icons.scale), // Иконка весов
-      _buildProfileRow(context, 'Рост', '********', Icons.height), // Иконка роста/линейки
-      _buildProfileRow(context, 'Уровень активности', '********', Icons.directions_run), // Иконка бегущего человека
-      _buildProfileRow(context, 'Целевой вес', '********', Icons.track_changes), // Иконка цели/мишени
+      _buildProfileRow(context, 'Имя пользователя', 'tami_insa', Icons.account_circle), // Иконка человека/аккаунта
+      _buildProfileRow(context, 'Email', '220698@astanait.edu.kz', Icons.email), // Иконка конверта
+      _buildProfileRow(context, 'Дата рождения', '30/10/2003', Icons.calendar_today), // Иконка календаря
+      _buildProfileRow(context, 'Пол', 'Женский', Icons.wc), // Иконка мужского/женского туалета (или generic 'person_2' если wc не подходит)
+      _buildProfileRow(context, 'Вес', '75', Icons.scale), // Иконка весов
+      _buildProfileRow(context, 'Рост', '175', Icons.height), // Иконка роста/линейки
+      _buildProfileRow(context, 'Уровень активности', 'сидячий', Icons.directions_run), // Иконка бегущего человека
+      _buildProfileRow(context, 'Целевой вес', '65', Icons.track_changes), // Иконка цели/мишени
     ],
   );
 }
@@ -69,9 +69,9 @@ class ProfileScreen extends StatelessWidget {
       context,
       title: 'Диета',
       children: [
-        _buildProfileRow(context, 'Цель', 'Поддержание веса', Icons.flag),
-        _buildProfileRow(context, 'Калории в день', '2000 ккал', Icons.local_fire_department),
-        _buildProfileRow(context, 'Предпочтения', 'Вегетарианская', Icons.restaurant),
+        _buildProfileRow(context, 'Цель', 'Сброс веса', Icons.flag),
+        _buildProfileRow(context, 'Калории в день', '2056 ккал', Icons.local_fire_department),
+        _buildProfileRow(context, 'Ограничения/аллергия', 'отсутсвует', Icons.restaurant),
       ],
     );
   }
