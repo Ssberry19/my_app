@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'dart:math';
+
 import 'package:my_app/features/diet/views/diet_screen.dart';
 import 'package:my_app/features/workouts/views/workouts_screen.dart';
 import 'package:my_app/features/tracker/views/tracker_screen.dart';
@@ -13,304 +13,189 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Mock data for demonstration
+  final int _caloriesToday = 1800;
+  final int _targetCalories = 2500;
+  final int _completedWorkouts = 3;
+  final int _totalWorkouts = 5;
+  final int _waterIntakeMl = 1500;
+  final int _waterTargetMl = 2000;
+  final double _sleepHours = 7.5;
+  final double _sleepTargetHours = 8.0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Главная', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFADD8E6), // Светло-голубой
-              Color(0xFF9370DB), // Средний фиолетовый (MediumPurple)
-              Color(0xFF6A5ACD),
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildGreeting(),
-              const SizedBox(height: 20),
-              _buildMetricsRow(),
-              const SizedBox(height: 20),
-              _buildQuickActions(),
-              const SizedBox(height: 20),
-              _buildWeightProgressChart(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGreeting() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10.0, top: 8),
-      child:Text(
-        'Welcome, <Соня>!',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.deepPurple[800],
-        ),
-      )
-    );
-  }
-
-  Widget _buildMetricsRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildMetricCard(
-            title: 'Калории сегодня',
-            value: '1200/2000',
-            progress: 0.6,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildMetricCard(
-            title: 'Тренировки',
-            value: '2/3 выполнено',
-            progress: 0.66,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetricCard({required String title, required String value, required double progress}) {
-  return Card(
-    // ignore: deprecated_member_use
-    color: Colors.white.withOpacity(0.9),
-    elevation: 4,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15), // Закрываем параметр shape
-    ), // <-- Добавлена закрывающая скобка для shape
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.deepPurple[800],
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.deepPurple[100],
-            color: Colors.deepPurple,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: Colors.deepPurple[800],
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+        title: const Text('Главная'), // Стиль берется из темы
+        // backgroundColor: Colors.deepPurple, // Удаляем
+        // elevation: 0, // Удаляем
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications_none, color: Theme.of(context).appBarTheme.foregroundColor), // Цвет иконки из темы
+            onPressed: () {
+              // TODO: Handle notifications
+            },
           ),
         ],
       ),
-    ),
-  ); // <-- Закрывающая скобка для Card
-}
-
-  Widget _buildQuickActions() {
-    return Card(
-      color: Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15)),
-      child: Padding(
+      // Убираем Container с градиентом
+      // body: Container(
+      //   decoration: const BoxDecoration(
+      //     gradient: LinearGradient(
+      //       begin: Alignment.topCenter,
+      //       end: Alignment.bottomCenter,
+      //       colors: [
+      //         Color(0xFFADD8E6),
+      //         Color(0xFF9370DB),
+      //         Color(0xFF6A5ACD),
+      //       ],
+      //     ),
+      //   ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildActionButton(
-              icon: Icons.restaurant,
-              label: 'Nearest meal time',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 500),
-                    pageBuilder: (_, __, ___) => DietScreen(),
-                    transitionsBuilder: (_, a, __, c) => 
-                      FadeTransition(opacity: a, child: c),
-                  ),
-                );
-              },
+            Text(
+              'Добро пожаловать!',
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: Theme.of(context).primaryColor,
+              ), // Стиль из темы
             ),
-            const Divider(color: Colors.deepPurple),
-            _buildActionButton(
-              icon: Icons.fitness_center,
-              label: 'Start training',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 500),
-                    pageBuilder: (_, __, ___) => WorkoutsScreen(),
-                    transitionsBuilder: (_, a, __, c) => 
-                      FadeTransition(opacity: a, child: c),
-                  ),
-                );
-              },
+            const SizedBox(height: 16),
+            _buildSectionCard(
+              context,
+              title: 'Статистика',
+              children: [
+                _buildMetricRow(context, 'Калории сегодня', '$_caloriesToday / $_targetCalories ккал', Icons.local_fire_department),
+                _buildMetricRow(context, 'Тренировки', '$_completedWorkouts / $_totalWorkouts завершено', Icons.fitness_center),
+                _buildMetricRow(context, 'Вода', '${_waterIntakeMl / 1000} / ${_waterTargetMl / 1000} л', Icons.water_drop),
+              ],
             ),
-            const Divider(color: Colors.deepPurple),
-            _buildActionButton(
-              icon: Icons.insights,
-              label: 'View progress',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 500),
-                    pageBuilder: (_, __, ___) => (TrackerScreen()),
-                    transitionsBuilder: (_, a, __, c) => 
-                      FadeTransition(opacity: a, child: c),
+            const SizedBox(height: 20),
+            _buildSectionCard(
+              context,
+              title: 'Прогресс',
+              children: [
+                _buildProgressChart(context),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const TrackerScreen()),
+                      );
+                    },
+                    child: const Text('Посмотреть подробнее'), // Стиль из темы
                   ),
-                );
-              },
+                ),
+              ],
             ),
+            const SizedBox(height: 20),
+            _buildSectionCard(
+              context,
+              title: 'Рекомендации',
+              children: [
+                _buildRecommendationItem(context, 'Попробуйте новый рецепт из раздела "Диета"!', Icons.restaurant_menu),
+                _buildRecommendationItem(context, 'Добавьте в свой план новую тренировку!', Icons.directions_run),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DietScreen()),
+                      );
+                    },
+                    child: const Text('Больше рекомендаций'), // Стиль из темы
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildActionButtons(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActionButton({required IconData icon, required String label, required VoidCallback onPressed}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.deepPurple),
-      title: Text(label, style: TextStyle(
-        color: Colors.deepPurple[800],
-        fontSize: 16)),
-      trailing: Icon(Icons.arrow_forward_ios, 
-        size: 16, 
-        color: Colors.deepPurple[300]),
-      onTap: onPressed,
+  Widget _buildSectionCard(BuildContext context, {required String title, required List<Widget> children}) {
+    // Card автоматически возьмет стиль из theme.dart
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge, // Использование стиля из темы
+            ),
+            const Divider(color: Colors.deepPurple), // Цвет из темы
+            ...children,
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildWeightProgressChart() {
-    // Пример данных (замените на данные из бэкенда)
-    final weightData = [
-      {'date': DateTime(2024, 1, 11), 'weight': 65.5},
-      {'date': DateTime(2024, 1, 25), 'weight': 71.0},
-      {'date': DateTime(2024, 2, 15), 'weight': 76.0},
-      {'date': DateTime(2024, 3, 1), 'weight': 73.0},
-      {'date': DateTime(2024, 3, 27), 'weight': 70.3},
-    ];
-
-    return Card(
-      color: Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+  Widget _buildMetricRow(BuildContext context, String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyLarge, // Стиль из темы
+            ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor), // Стиль и цвет из темы
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          children: [
-            Text('Weight Trend',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple[800])),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 300, // Увеличена высота для лучшего отображения
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
-                  titlesData: FlTitlesData(
-                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    bottomTitles: AxisTitles(
-                      axisNameWidget: Text('Date', 
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple[800])),
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          final index = value.toInt();
-                          if (index >= 0 && index < weightData.length) {
-                            final date = weightData[index]['date'] as DateTime;
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                '${date.day} ${_getMonthAbbreviation(date.month)}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.deepPurple[800],
-                                ),
-                              ),
-                            );
-                          }
-                          return const Text('');
-                        },
-                        interval: 1,
-                        reservedSize: 40, // Место для подписей дат
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      axisNameWidget: Text('Weight (kg)', 
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple[800])),
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Padding(
-                          padding: const EdgeInsets.only(right: 8.0, left: 10.0), // Увеличено с 8 до 12
-                          child: Text(
-                            '${value.toInt()}',
-                            style: TextStyle(
-                              fontSize: 11, // Увеличен размер шрифта
-                              color: Colors.deepPurple[800],
-                            ),
-                          ),
-                        ),
-                        interval: _calculateYInterval(weightData), // Автоподбор интервала
-                        reservedSize: 40, // Место для подписей кг
-                      ),
-                    ),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: weightData.asMap().entries.map((entry) {
-                        final index = entry.key.toDouble();
-                        final weight = entry.value['weight'] as double;
-                        return FlSpot(index, weight);
-                      }).toList(),
-                      color: Colors.deepPurple,
-                      dotData: FlDotData(show: true),
-                      belowBarData: BarAreaData(show: false),
-                    ),
-                  ],
-                  minX: 0,
-                  maxX: weightData.length.toDouble() - 1,
-                  minY: weightData.map((e) => e['weight'] as double).reduce(min) - 2,
-                  maxY: weightData.map((e) => e['weight'] as double).reduce(max) + 2,
-                ),
+    );
+  }
+
+  Widget _buildProgressChart(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      child: LineChart(
+        LineChartData(
+          gridData: FlGridData(show: false),
+          titlesData: FlTitlesData(show: false),
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: Colors.deepPurple.shade100, width: 1), // Цвет из темы
+          ),
+          lineBarsData: [
+            LineChartBarData(
+              spots: const [
+                FlSpot(0, 3),
+                FlSpot(1, 2),
+                FlSpot(2, 5),
+                FlSpot(3, 3),
+                FlSpot(4, 4.2),
+                FlSpot(5, 3.8),
+                FlSpot(6, 5),
+              ],
+              isCurved: true,
+              color: Theme.of(context).primaryColor, // Цвет из темы
+              barWidth: 3,
+              isStrokeCapRound: true,
+              dotData: FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                // ignore: deprecated_member_use
+                color: Theme.of(context).primaryColor.withOpacity(0.2), // Цвет из темы
               ),
             ),
           ],
@@ -319,75 +204,67 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Автоподбор интервала для оси Y
-  double _calculateYInterval(List<dynamic> data) {
-  final minWeight = data.map((e) => e['weight'] as double).reduce(min);
-  final maxWeight = data.map((e) => e['weight'] as double).reduce(max);
-  final range = maxWeight - minWeight;
-  
-  // Алгоритм "красивых" интервалов
-  final double roughStep = range / 5;
-  final int magnitude = pow(10, (roughStep.floor().toString().length - 1)).toInt();
-  final double step = (roughStep / magnitude).ceilToDouble() * magnitude;
-
-  return step;
-}
-
-  // Сокращение названий месяцев
-  String _getMonthAbbreviation(int month) {
-    return [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ][month - 1];
+  Widget _buildRecommendationItem(BuildContext context, String text, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Theme.of(context).hintColor), // Использование hintColor для разнообразия
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium, // Стиль из темы
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildActionButton(context, 'Диета', Icons.restaurant_menu, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const DietScreen()),
+          );
+        }),
+        _buildActionButton(context, 'Тренировки', Icons.fitness_center, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const WorkoutPlanPage()),
+          );
+        }),
+        _buildActionButton(context, 'Трекер', Icons.show_chart, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TrackerScreen()),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, String label, IconData icon, VoidCallback onPressed) {
+    return Column(
+      children: [
+        FloatingActionButton(
+          heroTag: label, // Добавляем heroTag для избежания ошибок
+          onPressed: onPressed,
+          mini: true,
+          // Стили берутся из floatingActionButtonTheme в theme.dart
+          child: Icon(icon),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w500, color: Theme.of(context).primaryColor), // Стиль и цвет из темы
+        ),
+      ],
+    );
+  }
 }
-// import 'package:flutter/material.dart';
-// import '../widgets/metric_card.dart';
-// import '../widgets/action_button.dart';
-// import '../widgets/progress_chart.dart';
-// import '../widgets/recommendation_card.dart';
-
-// class HomeScreen2 extends StatelessWidget {
-//   const HomeScreen2({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Главная'),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.notifications),
-//             onPressed: () {},
-//           ),
-//         ],
-//       ),
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           children: [
-//             // Добавьте здесь содержимое главной страницы
-//             const MetricCard(
-//               title: 'Активность',
-//               value: '85%',
-//               progress: 0.85,
-//             ),
-//             const SizedBox(height: 20),
-//             const ActionButton(
-//               icon: Icons.add,
-//               label: 'Добавить активность',
-//             ),
-//             const SizedBox(height: 20),
-//             const ProgressChart(),
-//             const SizedBox(height: 20),
-//             const RecommendationCard(
-//               text: 'Рекомендуем вечернюю прогулку',
-//               emoji: '🚶♀️',
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// } 

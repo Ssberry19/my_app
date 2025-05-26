@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       // Замените URL на ваш реальный эндпоинт
       final response = await http.post(
-        Uri.parse('https://api.example.com/login'),
+        Uri.parse('https://10.0.2.2:8004/api/users/login/'),
         body: {
           'email': _emailController.text,
           'password': _passwordController.text,

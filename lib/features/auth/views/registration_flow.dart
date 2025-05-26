@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import '../models/registration_data.dart';
 import 'steps/personal_info_step.dart';
@@ -37,19 +39,19 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     if (_userData.gender != null) {
       setState(() {
         final newSteps = <Widget>[
-          // PersonalInfoStep(
-          //   data: _userData,
-          //   onNext: _goNext,
-          //   onBack: _goBack,
-          //   currentStepIndex: 0,
-          //   onSaveAndContinue: _saveCurrentStepData, // Можно удалить, если не используется
-          // ),
-          // PhysicalParamsStep(
-          //   data: _userData,
-          //   onNext: _goNext,
-          //   onBack: _goBack,
-          //   currentStepIndex: 1,
-          // ),
+          PersonalInfoStep(
+            data: _userData,
+            onNext: _goNext,
+            onBack: _goBack,
+            currentStepIndex: 0,
+            onSaveAndContinue: _saveCurrentStepData, // Можно удалить, если не используется
+          ),
+          PhysicalParamsStep(
+            data: _userData,
+            onNext: _goNext,
+            onBack: _goBack,
+            currentStepIndex: 1,
+          ),
           GoalsStep(
             data: _userData,
             onNext: _goNext,
@@ -150,7 +152,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/users/create/'), // Убедитесь, что это ваш реальный эндпоинт для регистрации
+        Uri.parse('http://10.0.2.2:8004/api/users/create/'), // Убедитесь, что это ваш реальный эндпоинт для регистрации
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

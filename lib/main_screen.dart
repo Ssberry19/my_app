@@ -5,7 +5,6 @@ import 'features/tracker/views/tracker_screen.dart';
 import 'features/workouts/views/workouts_screen.dart';
 import 'features/home/views/home_screen.dart';
 
-
 // Экран с нижней навигацией
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,10 +17,10 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final _screens = [
-    const HomeScreen(), // Главная страница теперь первая
+    const HomeScreen(),
     const DietScreen(),
     const TrackerScreen(),
-    const WorkoutsScreen(),
+    const WorkoutPlanPage(),
     const ProfileScreen(),
   ];
 
@@ -32,8 +31,10 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.blueGrey,
+        // Убраны selectedItemColor и unselectedItemColor,
+        // чтобы они брались из BottomNavigationBarThemeData в theme.dart
+        // selectedItemColor: Colors.deepPurple, // Удалить эту строку
+        // unselectedItemColor: Colors.blueGrey, // Удалить эту строку
         showUnselectedLabels: true,
         items: const [
           BottomNavigationBarItem(

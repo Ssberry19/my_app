@@ -14,9 +14,10 @@ final ThemeData appTheme = ThemeData(
 
   // Улучшенные цвета для TextSelection (выделение текста)
   textSelectionTheme: TextSelectionThemeData(
-    cursorColor: Colors.deepPurple, // Цвет курсора
-    selectionColor: Colors.deepPurple.withOpacity(0.3), // Цвет выделения
-    selectionHandleColor: Colors.deepPurple, // Цвет "ручек" выделения
+    cursorColor: Colors.deepPurple,
+    // ignore: deprecated_member_use
+    selectionColor: Colors.deepPurple.withOpacity(0.2), // Мягкое выделение
+    selectionHandleColor: Colors.deepPurple,
   ),
 
   // Тема AppBar
@@ -24,11 +25,11 @@ final ThemeData appTheme = ThemeData(
     backgroundColor: Colors.deepPurple, // Фон AppBar
     foregroundColor: Colors.white, // Цвет текста и иконок на AppBar
     centerTitle: true, // Заголовок по центру
-    elevation: 8, // Более выраженная тень
-    shadowColor: Colors.deepPurpleAccent, // Цвет тени
+    elevation: 0, // Убираем тень для более современного вида
+    // shadowColor: Colors.deepPurpleAccent, // Можно убрать, если elevation 0
     titleTextStyle: TextStyle( // Стиль текста заголовка
       color: Colors.white,
-      fontSize: 22, // Чуть больше размер
+      fontSize: 22, // Чуть больше
       fontWeight: FontWeight.w700, // Более жирный
       letterSpacing: 0.5, // Небольшой межбуквенный интервал
     ),
@@ -44,12 +45,13 @@ final ThemeData appTheme = ThemeData(
         borderRadius: BorderRadius.circular(12), // Более округлые
       ),
       textStyle: const TextStyle( // Стиль текста кнопки
-        fontSize: 17, // Чуть больше размер
-        fontWeight: FontWeight.w600, // Немного менее жирный
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
         letterSpacing: 0.5,
       ),
-      elevation: 6, // Тень кнопки
-      shadowColor: Colors.deepPurple.shade300,
+      elevation: 4, // Умеренная тень
+      // ignore: deprecated_member_use
+      shadowColor: Colors.deepPurple.shade300.withOpacity(0.4), // Мягкая тень
     ),
   ),
 
@@ -83,18 +85,20 @@ final ThemeData appTheme = ThemeData(
   // Тема TextFormField и DropdownButtonFormField (через InputDecorationTheme)
   inputDecorationTheme: InputDecorationTheme(
     filled: true, // Заполненный фон
-    fillColor: Colors.deepPurple.withOpacity(0.07), // Чуть более выраженный фиолетовый фон
+    // ignore: deprecated_member_use
+    fillColor: Colors.deepPurple.withOpacity(0.05), // Легкий фиолетовый фон
     border: OutlineInputBorder( // Общая граница
       borderRadius: BorderRadius.circular(12), // Более округлые углы
       borderSide: BorderSide.none, // Без видимой границы по умолчанию
     ),
     enabledBorder: OutlineInputBorder( // Граница, когда поле активно, но не в фокусе
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: Colors.deepPurple.shade200, width: 1),
+      // ignore: deprecated_member_use
+      borderSide: BorderSide(color: Colors.deepPurple.shade200.withOpacity(0.5), width: 1), // Более мягкая граница
     ),
     focusedBorder: OutlineInputBorder( // Граница, когда поле в фокусе
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Colors.deepPurple, width: 2.5), // Более выраженная обводка
+      borderSide: const BorderSide(color: Colors.deepPurple, width: 2), // Выраженная обводка
     ),
     errorBorder: OutlineInputBorder( // Граница при ошибке
       borderRadius: BorderRadius.circular(12),
@@ -141,35 +145,35 @@ final ThemeData appTheme = ThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), // Более округлые
   ),
 
- // Для CardTheme
-  cardTheme: CardThemeData( // Исправлено: CardTheme на CardThemeData
-  elevation: 8,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(18),
+  // Тема Card (для карточек)
+  cardTheme: CardThemeData(
+    elevation: 6, // Более мягкая тень
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18), // Более округлые углы
+    ),
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Уменьшаем горизонтальные отступы, добавляем вертикальные
+    color: Colors.white, // Цвет карточки
+    // ignore: deprecated_member_use
+    shadowColor: Colors.deepPurple.withOpacity(0.15), // Более мягкая и менее насыщенная тень
   ),
-  margin: const EdgeInsets.all(12),
-  color: Colors.white,
-  shadowColor: Colors.deepPurple.withOpacity(0.2),
-),
 
   // Тема Dialog (для всплывающих окон)
- // Для DialogTheme
-  dialogTheme: DialogThemeData( // Исправлено: DialogTheme на DialogThemeData
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(20),
+  dialogTheme: DialogThemeData(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20), // Более округлые
+    ),
+    backgroundColor: Colors.white,
+    elevation: 10,
+    titleTextStyle: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      color: Colors.deepPurple.shade800,
+    ),
+    contentTextStyle: const TextStyle(
+      fontSize: 16,
+      color: Colors.black87,
+    ),
   ),
-  backgroundColor: Colors.white,
-  elevation: 10,
-  titleTextStyle: TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    color: Colors.deepPurple.shade800,
-  ),
-  contentTextStyle: const TextStyle(
-    fontSize: 16,
-    color: Colors.black87,
-  ),
-),
 
   // Тема BottomNavigationBar (для нижней навигационной панели)
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -183,23 +187,23 @@ final ThemeData appTheme = ThemeData(
   ),
 
   // Тема TabBar (для вкладок)
-// Для TabBarTheme
-  tabBarTheme: TabBarThemeData( // Исправлено: TabBarTheme на TabBarThemeData
-  labelColor: Colors.deepPurple,
-  unselectedLabelColor: Colors.grey.shade600,
-  indicatorSize: TabBarIndicatorSize.tab,
-  indicator: const UnderlineTabIndicator(
-    borderSide: BorderSide(color: Colors.deepPurple, width: 3),
+  tabBarTheme: TabBarThemeData(
+    labelColor: Colors.deepPurple,
+    unselectedLabelColor: Colors.grey.shade600,
+    indicatorSize: TabBarIndicatorSize.tab,
+    indicator: const UnderlineTabIndicator(
+      borderSide: BorderSide(color: Colors.deepPurple, width: 3),
+    ),
+    labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
   ),
-  labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
-),
 
   // Тема Slider (для ползунков)
   sliderTheme: SliderThemeData(
     activeTrackColor: Colors.deepPurple,
     inactiveTrackColor: Colors.deepPurple.shade100,
     thumbColor: Colors.deepPurpleAccent,
+    // ignore: deprecated_member_use
     overlayColor: Colors.deepPurple.withOpacity(0.2),
     valueIndicatorColor: Colors.deepPurple.shade700,
     valueIndicatorTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
@@ -207,14 +211,14 @@ final ThemeData appTheme = ThemeData(
 
   // Тема Switch (для переключателей)
   switchTheme: SwitchThemeData(
-    thumbColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
+    thumbColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.deepPurple;
       }
       return Colors.grey.shade400;
     }),
-    trackColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
+    trackColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.deepPurple.shade200;
       }
       return Colors.grey.shade300;
@@ -223,17 +227,17 @@ final ThemeData appTheme = ThemeData(
 
   // Тема Checkbox и Radio
   checkboxTheme: CheckboxThemeData(
-    fillColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.deepPurple;
       }
       return Colors.grey.shade400;
     }),
-    checkColor: MaterialStateProperty.all(Colors.white),
+    checkColor: WidgetStateProperty.all(Colors.white),
   ),
   radioTheme: RadioThemeData(
-    fillColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.deepPurple;
       }
       return Colors.grey.shade400;
@@ -252,6 +256,7 @@ final ThemeData appTheme = ThemeData(
   // Тема Tooltip (для всплывающих подсказок)
   tooltipTheme: TooltipThemeData(
     decoration: BoxDecoration(
+      // ignore: deprecated_member_use
       color: Colors.deepPurple.shade900.withOpacity(0.9),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -276,6 +281,7 @@ final ThemeData appTheme = ThemeData(
     brightness: Brightness.light,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     deleteIconColor: Colors.deepPurple.shade600,
+    // ignore: deprecated_member_use
     shadowColor: Colors.deepPurple.withOpacity(0.1),
     elevation: 2,
   ),
