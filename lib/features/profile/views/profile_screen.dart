@@ -51,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildAccountSection(BuildContext context) {
     return _buildSectionCard(
       context,
-      title: 'Аккаунт',
+      title: 'Account',
       children: [
         _buildProfileRow(
           context,
@@ -62,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
         _buildProfileRow(
           context,
           'Email',
-          '220698@astanait.edu.kz',
+          'tahinii@mail.ru',
           Icons.email,
         ), // Иконка конверта
         _buildProfileRow(
