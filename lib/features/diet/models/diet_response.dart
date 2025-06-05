@@ -6,9 +6,9 @@ DietResponse dietResponseFromJson(String str) => DietResponse.fromJson(json.deco
 String dietResponseToJson(DietResponse data) => json.encode(data.toJson());
 
 class DietResponse {
-  final String status;
-  final String bmiCase; // Assuming BMI info is still part of the response
-  final String bfpCase; // Assuming BFP info is still part of the response
+  final String? status; // Сделано nullable
+  final String? bmiCase; // Сделано nullable
+  final String? bfpCase; // Сделано nullable
   final List<DietPlan> dietPlan;
 
   DietResponse({
@@ -22,6 +22,8 @@ class DietResponse {
         status: json["status"],
         bmiCase: json["bmi_case"],
         bfpCase: json["bfp_case"],
+        // Если diet_plan может быть null или отсутствовать,
+        // возможно, потребуется `(json["diet_plan"] as List?)?.map(...)?.toList() ?? []`
         dietPlan: List<DietPlan>.from(json["diet_plan"].map((x) => DietPlan.fromJson(x))),
       );
 
@@ -35,8 +37,8 @@ class DietResponse {
 
 class DietPlan {
   final int day;
-  final String dietName;
-  final String description;
+  final String? dietName; // Сделано nullable
+  final String? description; // Сделано nullable
   final List<Meal> meals;
 
   DietPlan({
@@ -50,6 +52,7 @@ class DietPlan {
         day: json["day"],
         dietName: json["diet_name"],
         description: json["description"],
+        // Аналогично, если meals может быть null
         meals: List<Meal>.from(json["meals"].map((x) => Meal.fromJson(x))),
       );
 
@@ -62,10 +65,10 @@ class DietPlan {
 }
 
 class Meal {
-  final String name;
-  final String type; // e.g., "Breakfast", "Lunch", "Dinner", "Snack"
-  final String description;
-  final double calories;
+  final String? name; // Сделано nullable
+  final String? type; // Сделано nullable
+  final String? description; // Сделано nullable
+  final double? calories; // Уже был nullable
 
   Meal({
     required this.name,

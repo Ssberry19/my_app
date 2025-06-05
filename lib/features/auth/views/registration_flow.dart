@@ -10,6 +10,7 @@ import 'steps/credentials_step.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http; // Добавляем импорт для HTTP
 import 'dart:convert'; // Добавляем импорт для JSON
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class RegistrationFlow extends StatefulWidget {
   const RegistrationFlow({super.key});
@@ -135,6 +136,10 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
   // Метод, который вызывается для отправки всех данных при завершении регистрации
   Future<void> _completeRegistration() async {
     // Собираем все данные из _userData
+
+    // Получаем BACKEND_URL из .env или используем значение по умолчанию
+    final backendUrl = dotenv.env['BACKEND_URL'];
+    
     final Map<String, dynamic> registrationPayload = {
       'fullName': _userData.fullName,
       'gender': _userData.gender?.toString().split('.').last, // Преобразуем Enum в строку
@@ -152,7 +157,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8004/api/users/create/'), // Убедитесь, что это ваш реальный эндпоинт для регистрации
+        Uri.parse('$backendUrl/api/users/create/'), // Убедитесь, что это ваш реальный эндпоинт для регистрации
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

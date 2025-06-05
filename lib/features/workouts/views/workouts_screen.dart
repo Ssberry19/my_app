@@ -1,7 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/workout_request.dart'; // Убедитесь, что путь верен
 import '../models/workout_response.dart'; // Убедитесь, что путь верен
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // <-- Добавлен импорт для dotenv
 
 class WorkoutPlanPage extends StatefulWidget {
   const WorkoutPlanPage({super.key});
@@ -33,7 +36,14 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       _errorMessage = null;
     });
 
-    const String apiUrl = 'http://10.0.2.2:8000/workout-calories/generate'; // Ваш эндпоинт FastAPI
+    // Получаем базовый URL из .env файла.
+    // Если .env файл не загружен или переменная отсутствует, используем localhost как запасной вариант.
+    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000'; 
+    const String endpoint = '/workout-calories/generate';
+    final String apiUrl = '$baseUrl$endpoint'; // Комбинируем базовый URL и эндпоинт
+    
+    print('Attempting to connect to: $apiUrl'); // Для отладки, чтобы видеть, куда идет запрос
+    print('ALISHER: $workoutRequestToJson(_requestData)'); // Выводим данные запроса для отладки
 
     try {
       final response = await http.post(
@@ -42,13 +52,13 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: workoutRequestToJson(_requestData),
+        body: workoutRequestToJson(_requestData), // Здесь данные запроса преобразуются в JSON
       );
 
       if (response.statusCode == 200) {
         // Успешный ответ
         setState(() {
-          _workoutResponse = workoutResponseFromJson(response.body);
+          _workoutResponse = workoutResponseFromJson(response.body); // Здесь JSON-ответ от FastAPI преобразуется в Dart-объекты
         });
       } else {
         // Ошибка сервера или невалидный ответ
@@ -58,10 +68,11 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
         });
       }
     } catch (e) {
-      // Ошибка сети (например, сервер недоступен)
+      // Ошибка сети (например, сервер недоступен, брандмауэр блокирует, таймаут)
       setState(() {
         _errorMessage = 'Could not connect to server: $e';
       });
+      print('Network/Connection error: $e'); // Дополнительный вывод ошибки в консоль
     } finally {
       setState(() {
         _isLoading = false;
@@ -91,14 +102,14 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red, size: 60),
-                        SizedBox(height: 10),
+                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                        const SizedBox(height: 10),
                         Text(
                           'Loading error: $_errorMessage',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red, fontSize: 16),
+                          style: const TextStyle(color: Colors.red, fontSize: 16),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: _fetchWorkoutPlan,
                           child: const Text('Retry'),
@@ -202,204 +213,10 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           Text('Notes: ${exercise.notes}'),
           Text('Calories Burned: ${exercise.caloriesBurned.toStringAsFixed(2)}'),
           if (exercise.caloriesBurned == 0) // Пример выделения
-            Text(' (Value 0.00 may show on placeholder)', style: TextStyle(color: Colors.orange)),
+            const Text(' (Value 0.00 may show on placeholder)', style: TextStyle(color: Colors.orange)),
           const SizedBox(height: 8),
         ],
       ),
     );
   }
 }
-// import 'package:flutter/material.dart';
-
-// class WorkoutsScreen extends StatelessWidget {
-//   const WorkoutsScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Тренировки'), // Стиль берется из темы
-//         // backgroundColor: Colors.deepPurple, // Удаляем
-//         // elevation: 0, // Удаляем
-//       ),
-//       // Убираем Container с градиентом
-//       // body: Container(
-//       //   decoration: const BoxDecoration(
-//       //     gradient: LinearGradient(
-//       //       begin: Alignment.topCenter,
-//       //       end: Alignment.bottomCenter,
-//       //       colors: [
-//       //         Color(0xFFE6E6FA),
-//       //         Color(0xFFD8BFD8),
-//       //       ],
-//       //     ),
-//       //   ),
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           children: [
-//             _buildWeeklyPlan(context), // Передаем context
-//             const SizedBox(height: 20),
-//             _buildWorkoutList(context), // Передаем context
-//             const SizedBox(height: 20),
-//             _buildPerformanceSection(context), // Передаем context
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildWeeklyPlan(BuildContext context) {
-//     // Card автоматически возьмет стиль из theme.dart
-//     return Card(
-//       child: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             _buildSectionHeader(context, 'План тренировок на неделю'), // Передаем context
-//             const Divider(color: Colors.deepPurple), // Цвет из темы
-//             const SizedBox(height: 10),
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceAround,
-//               children: List.generate(7, (index) {
-//                 final day = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'][index];
-//                 return Column(
-//                   children: [
-//                     Text(day, style: Theme.of(context).textTheme.bodyMedium), // Стиль из темы
-//                     const SizedBox(height: 4),
-//                     CircleAvatar(
-//                       radius: 18,
-//                       backgroundColor: index == 0 ? Theme.of(context).primaryColor : Colors.grey[200], // Цвет из темы
-//                       child: Text(
-//                         (index + 1).toString(),
-//                         style: TextStyle(
-//                             color: index == 0 ? Colors.white : Colors.black87,
-//                             fontWeight: FontWeight.bold),
-//                       ),
-//                     ),
-//                   ],
-//                 );
-//               }),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildWorkoutList(BuildContext context) {
-//     // Card автоматически возьмет стиль из theme.dart
-//     return Card(
-//       child: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             _buildSectionHeader(context, 'Предстоящие тренировки'), // Передаем context
-//             const Divider(color: Colors.deepPurple), // Цвет из темы
-//             _buildWorkoutItem(context, 'Силовая тренировка', 'Завтра, 18:00', Icons.run_circle),
-//             _buildWorkoutItem(context, 'Кардио', 'Среда, 07:00', Icons.directions_bike),
-//             _buildWorkoutItem(context, 'Растяжка', 'Пятница, 20:00', Icons.self_improvement),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildWorkoutItem(BuildContext context, String title, String time, IconData icon) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 8),
-//       child: Row(
-//         children: [
-//           Icon(icon, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
-//           const SizedBox(width: 12),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   title,
-//                   style: Theme.of(context).textTheme.titleMedium, // Стиль из темы
-//                 ),
-//                 Text(
-//                   time,
-//                   style: Theme.of(context).textTheme.bodySmall, // Стиль из темы
-//                 ),
-//               ],
-//             ),
-//           ),
-//           IconButton(
-//             icon: Icon(Icons.check_circle_outline, color: Theme.of(context).hintColor), // Цвет иконки из темы
-//             onPressed: () {
-//               // TODO: Mark workout as complete
-//             },
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildPerformanceSection(BuildContext context) {
-//     // Card автоматически возьмет стиль из theme.dart
-//     return Card(
-//       child: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             _buildSectionHeader(context, 'Запись результатов тренировок'), // Передаем context
-//             const Divider(color: Colors.deepPurple), // Цвет из темы
-//             _buildPerformanceField(context, 'Упражнение', 'Например: Приседания со штангой'),
-//             _buildPerformanceField(context, 'Вес (кг)', 'Например: 80'),
-//             _buildPerformanceField(context, 'Повторения', 'Например: 10'),
-//             _buildPerformanceField(context, 'Подходы', 'Например: 3'),
-//             const SizedBox(height: 16),
-//             ElevatedButton.icon(
-//               icon: Icon(Icons.add, size: Theme.of(context).iconTheme.size), // Размер иконки из темы
-//               label: const Text('Добавить запись'), // Стиль из темы
-//               onPressed: () {
-//                 // TODO: Add performance record
-//               },
-//               // Стили кнопки берутся из ElevatedButtonThemeData в theme.dart
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildPerformanceField(BuildContext context, String label, String hint) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 8),
-//       child: TextFormField(
-//         decoration: InputDecoration(
-//           labelText: label,
-//           hintText: hint,
-//           // floatingLabelStyle: TextStyle(color: Colors.deepPurple[800]), // Удаляем, берется из темы
-//           // border: OutlineInputBorder( // Удаляем, берется из темы
-//           //   borderRadius: BorderRadius.circular(8),
-//           //   borderSide: BorderSide(color: Colors.deepPurple),
-//           // ),
-//           // focusedBorder: OutlineInputBorder( // Удаляем, берется из темы
-//           //   borderSide: BorderSide(color: Colors.deepPurple, width: 2),
-//           // ),
-//           // Остальные стили берутся из InputDecorationTheme в theme.dart
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildSectionHeader(BuildContext context, String title) {
-//     return Row(
-//       children: [
-//         Icon(Icons.sports_gymnastics, color: Theme.of(context).iconTheme.color), // Цвет иконки из темы
-//         const SizedBox(width: 8),
-//         Text(
-//           title,
-//           style: Theme.of(context).textTheme.titleLarge, // Стиль из темы
-//         ),
-//       ],
-//     );
-//   }
-// }

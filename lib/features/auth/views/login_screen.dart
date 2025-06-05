@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,10 +25,12 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
+    final backendUrl = dotenv.env['BACKEND_URL'];
+
     try {
       // Замените URL на ваш реальный эндпоинт
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8004/api/users/login/'),
+        Uri.parse('$backendUrl/api/users/login/'),
         body: {
           'email': _emailController.text,
           'password': _passwordController.text,

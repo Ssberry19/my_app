@@ -1,7 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../models/diet_request.dart'; // Make sure the path is correct
-import '../models/diet_response.dart'; // Make sure the path is correct
+import '../models/diet_request.dart';
+import '../models/diet_response.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DietScreen extends StatefulWidget {
   const DietScreen({super.key});
@@ -15,23 +18,22 @@ class _DietScreenState extends State<DietScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Updated request data based on the new curl command
   final DietRequest _requestData = DietRequest(
-    heightCm: 175, // Example value, adjust as needed
-    weightKg: 75,   // Example value, adjust as needed
-    age: 21,      // Example value, adjust as needed
-    gender: "female", // Example value, adjust as needed
-    goal: "weight_loss", // Example value, adjust as needed
-    targetWeight: 65.0, // Example value, adjust as needed
-    activityLevel: "sedentery", // Example value, adjust as needed
-    allergens: [], // Example values, adjust as needed
-    days: 7,      // Example value, adjust as needed
+    heightCm: 175,
+    weightKg: 75,
+    age: 21,
+    gender: "female",
+    goal: "weight_loss",
+    targetWeight: 65.0,
+    activityLevel: "sedentary",
+    allergens: [],
+    days: 7,
   );
 
   @override
   void initState() {
     super.initState();
-    _fetchDietPlan(); // Automatically request data when the page loads
+    _fetchDietPlan();
   }
 
   Future<void> _fetchDietPlan() async {
@@ -40,8 +42,11 @@ class _DietScreenState extends State<DietScreen> {
       _errorMessage = null;
     });
 
-    // Updated API endpoint
-    const String apiUrl = 'http://10.0.2.2:8000/generate-diet'; // Your FastAPI endpoint for diet
+    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000';
+    const String endpoint = '/generate-diet';
+    final String apiUrl = '$baseUrl$endpoint';
+    
+    print('Attempting to connect to: $apiUrl');
 
     try {
       final response = await http.post(
@@ -54,22 +59,23 @@ class _DietScreenState extends State<DietScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Successful response
+        print('Successful API response body: ${response.body}');
         setState(() {
           _dietResponse = dietResponseFromJson(response.body);
         });
       } else {
-        // Server error or invalid response
+        print('Server error status code: ${response.statusCode}');
+        print('Server error response body: ${response.body}');
         setState(() {
           _errorMessage =
-              'Error ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
+              'Ошибка ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
         });
       }
     } catch (e) {
-      // Network error (e.g., server unreachable)
       setState(() {
         _errorMessage = 'Could not connect to server: $e';
       });
+      print('Network/Connection error: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -121,17 +127,20 @@ class _DietScreenState extends State<DietScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoCard('Status', response.status, Colors.green),
-          _buildInfoCard('BMI Category', response.bmiCase, Colors.blue),
-          _buildInfoCard('BFP Category', response.bfpCase, Colors.teal),
+          // Используем оператор ?? для предоставления значения по умолчанию, если поле null
+          _buildInfoCard('Status', response.status ?? 'N/A', Colors.green),
+          _buildInfoCard('BMI Category', response.bmiCase ?? 'N/A', Colors.blue),
+          _buildInfoCard('BFP Category', response.bfpCase ?? 'N/A', Colors.teal),
           const SizedBox(height: 20),
           const Text(
             'Your diet plan:',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          ...response.dietPlan.map((dayPlan) => _buildDayDietCard(dayPlan)),
-          // Keep action buttons at the bottom if they are not part of the API response data
+          // Проверяем, что dietPlan не null и не пуст
+          ...(response.dietPlan.isNotEmpty
+              ? response.dietPlan.map((dayPlan) => _buildDayDietCard(dayPlan)).toList()
+              : [const Center(child: Text('Diet plan data is missing or empty.'))]),
           const SizedBox(height: 20),
           _buildActionButtons(context),
         ],
@@ -172,17 +181,21 @@ class _DietScreenState extends State<DietScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Используем оператор ?? для безопасного доступа к nullable полям
             Text(
-              'Day ${dayPlan.day}: ${dayPlan.dietName}',
+              'Day ${dayPlan.day}: ${dayPlan.dietName ?? 'No Diet Name'}', // <-- ИСПРАВЛЕНО
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
             ),
             const SizedBox(height: 8),
             Text(
-              dayPlan.description,
+              dayPlan.description ?? 'No description provided.', // <-- ИСПРАВЛЕНО (это строка 89)
               style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey[700]),
             ),
             const Divider(height: 20, thickness: 1),
-            ...dayPlan.meals.map((meal) => _buildMealTile(meal)),
+            // Проверяем, что meals не null и не пуст
+            ...(dayPlan.meals.isNotEmpty
+                ? dayPlan.meals.map((meal) => _buildMealTile(meal)).toList()
+                : [const Text('No meals planned for this day.')]),
           ],
         ),
       ),
@@ -195,22 +208,21 @@ class _DietScreenState extends State<DietScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Используем оператор ?? для безопасного доступа к nullable полям
           Text(
-            '${meal.type}: ${meal.name}',
+            '${meal.type ?? 'N/A'}: ${meal.name ?? 'No Meal Name'}', // <-- ИСПРАВЛЕНО
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          Text(meal.description),
-          Text('Calories: ${meal.calories.toStringAsFixed(2)} kcal'),
-          // if (meal.calories == 0) // Example highlighting for 0 calories, adjust as needed
-          //   Text(' (Value 0.00 may show on placeholder)', style: TextStyle(color: Colors.orange)),
+          Text(meal.description ?? 'No description provided.'), // <-- ИСПРАВЛЕНО
+          // Проверяем, что calories не null перед вызовом toStringAsFixed
+          Text('Calories: ${meal.calories?.toStringAsFixed(2) ?? 'N/A'} kcal'),
           const SizedBox(height: 8),
         ],
       ),
     );
   }
 
-  // Action buttons remain the same as they are UI elements not directly tied to API data
   Widget _buildActionButtons(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
