@@ -40,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
                 context.go('/welcome'); // Example navigation to WelcomeScreen
               },
               // Стиль берется из ElevatedButtonThemeData в theme.dart
-              child: const Text('Logout'),
+              child: const Text('Log out'),
             ),
           ],
         ),

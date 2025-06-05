@@ -1,112 +1,160 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../models/diet_request.dart'; // Make sure the path is correct
+import '../models/diet_response.dart'; // Make sure the path is correct
 
-class DietScreen extends StatelessWidget {
+class DietScreen extends StatefulWidget {
   const DietScreen({super.key});
+
+  @override
+  State<DietScreen> createState() => _DietScreenState();
+}
+
+class _DietScreenState extends State<DietScreen> {
+  DietResponse? _dietResponse;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  // Updated request data based on the new curl command
+  final DietRequest _requestData = DietRequest(
+    heightCm: 175, // Example value, adjust as needed
+    weightKg: 75,   // Example value, adjust as needed
+    age: 21,      // Example value, adjust as needed
+    gender: "female", // Example value, adjust as needed
+    goal: "weight_loss", // Example value, adjust as needed
+    targetWeight: 65.0, // Example value, adjust as needed
+    activityLevel: "sedentery", // Example value, adjust as needed
+    allergens: [], // Example values, adjust as needed
+    days: 7,      // Example value, adjust as needed
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDietPlan(); // Automatically request data when the page loads
+  }
+
+  Future<void> _fetchDietPlan() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    // Updated API endpoint
+    const String apiUrl = 'http://10.0.2.2:8000/generate-diet'; // Your FastAPI endpoint for diet
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: dietRequestToJson(_requestData),
+      );
+
+      if (response.statusCode == 200) {
+        // Successful response
+        setState(() {
+          _dietResponse = dietResponseFromJson(response.body);
+        });
+      } else {
+        // Server error or invalid response
+        setState(() {
+          _errorMessage =
+              'Error ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
+        });
+      }
+    } catch (e) {
+      // Network error (e.g., server unreachable)
+      setState(() {
+        _errorMessage = 'Could not connect to server: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Diet'), // Style comes from theme.dart
-        // backgroundColor: Colors.deepPurple, // Удаляем, берется из темы
-        // elevation: 0, // Удаляем, берется из темы
+        title: const Text('Weekly Diet Plan'),
+        backgroundColor: Colors.deepPurple,
       ),
-      // Убираем Container с градиентом, чтобы использовать scaffoldBackgroundColor из темы
-      // body: Container(
-      //   decoration: const BoxDecoration(
-      //     gradient: LinearGradient(
-      //       begin: Alignment.topCenter,
-      //       end: Alignment.bottomCenter,
-      //       colors: [
-      //         Color(0xFFE6E6FA),
-      //         Color(0xFFD8BFD8),
-      //       ],
-      //     ),
-      //   ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildWeeklyPlan(context), // Передаем context
-            const SizedBox(height: 20),
-            _buildMealSection(
-              context,
-              'Breakfast',
-              _breakfastContent(context),
-            ), // Передаем context
-            const SizedBox(height: 20),
-            _buildMealSection(
-              context,
-              'Lunch',
-              _lunchContent(context),
-            ), // Передаем context
-            const SizedBox(height: 20),
-            _buildMealSection(
-              context,
-              'Dinner',
-              _dinnerContent(context),
-            ), // Передаем context
-            const SizedBox(height: 20),
-            _buildMealSection(
-              context,
-              'Snack',
-              _snackContent(context),
-            ), // Передаем context
-            const SizedBox(height: 20),
-            _buildActionButtons(context), // Передаем context
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeeklyPlan(BuildContext context) {
-    // Card автоматически возьмет стиль из theme.dart
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Plan for the week',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge, // Использование стиля из темы
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(7, (index) {
-                final day = [
-                  'Mon',
-                  'Tue',
-                  'Wed',
-                  'Thu',
-                  'Fri',
-                  'Sat',
-                  'Sun',
-                ][index];
-                return Column(
-                  children: [
-                    Text(day, style: Theme.of(context).textTheme.bodyMedium),
-                    const SizedBox(height: 4),
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: index == 0
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey[200],
-                      child: Text(
-                        (index + 1).toString(),
-                        style: TextStyle(
-                          color: index == 0 ? Colors.white : Colors.black87,
-                          fontWeight: FontWeight.bold,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Loading error: $_errorMessage',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.red, fontSize: 16),
                         ),
-                      ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _fetchDietPlan,
+                          child: const Text('Retry'),
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              }),
+                  ),
+                )
+              : _dietResponse == null
+                  ? const Center(child: Text('No diet plan available'))
+                  : _buildDietPlanDisplay(_dietResponse!),
+    );
+  }
+
+  Widget _buildDietPlanDisplay(DietResponse response) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInfoCard('Status', response.status, Colors.green),
+          _buildInfoCard('BMI Category', response.bmiCase, Colors.blue),
+          _buildInfoCard('BFP Category', response.bfpCase, Colors.teal),
+          const SizedBox(height: 20),
+          const Text(
+            'Your diet plan:',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ...response.dietPlan.map((dayPlan) => _buildDayDietCard(dayPlan)),
+          // Keep action buttons at the bottom if they are not part of the API response data
+          const SizedBox(height: 20),
+          _buildActionButtons(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String value, Color color) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      color: color.withOpacity(0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '$title:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            Text(
+              value,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
             ),
           ],
         ),
@@ -114,160 +162,55 @@ class DietScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMealSection(BuildContext context, String title, Widget content) {
-    // Card автоматически возьмет стиль из theme.dart
+  Widget _buildDayDietCard(DietPlan dayPlan) {
     return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 10.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge, // Использование стиля из темы
+              'Day ${dayPlan.day}: ${dayPlan.dietName}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
             ),
-            const Divider(
-              color: Colors.deepPurple,
-            ), // Divider остается, цвет из темы
-            content,
+            const SizedBox(height: 8),
+            Text(
+              dayPlan.description,
+              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey[700]),
+            ),
+            const Divider(height: 20, thickness: 1),
+            ...dayPlan.meals.map((meal) => _buildMealTile(meal)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMealItem(
-    BuildContext context,
-    String title,
-    String description,
-    String calories,
-  ) {
+  Widget _buildMealTile(Meal meal) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.fastfood,
-            color: Theme.of(context).iconTheme.color,
-          ), // Использование цвета иконки из темы
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleMedium, // Использование стиля из темы
-                ),
-                Text(
-                  description,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall, // Использование стиля из темы
-                ),
-              ],
-            ),
-          ),
           Text(
-            calories,
-            style: Theme.of(context).textTheme.titleSmall!.copyWith(
-              color: Theme.of(context).primaryColor,
-            ), // Использование стиля и цвета из темы
+            '${meal.type}: ${meal.name}',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 4),
+          Text(meal.description),
+          Text('Calories: ${meal.calories.toStringAsFixed(2)} kcal'),
+          // if (meal.calories == 0) // Example highlighting for 0 calories, adjust as needed
+          //   Text(' (Value 0.00 may show on placeholder)', style: TextStyle(color: Colors.orange)),
+          const SizedBox(height: 8),
         ],
       ),
     );
   }
 
-  Widget _breakfastContent(BuildContext context) {
-    return Column(
-      children: [
-        _buildMealItem(context, 'Oatmeal with berries', '250g', '300 kcal'),
-        _buildMealItem(
-          context,
-          'Scrambled eggs with toast',
-          '1 serving',
-          '450 kcal',
-        ),
-        _buildHealthBenefits(
-          context,
-          'Start your day with energy and vitamins.',
-        ), // Передаем context
-      ],
-    );
-  }
-
-  Widget _lunchContent(BuildContext context) {
-    return Column(
-      children: [
-        _buildMealItem(context, 'Chicken Salad', '300g', '400 kcal'),
-        _buildMealItem(context, 'Broccoli Cream Soup', '200ml', '200 kcal'),
-        _buildHealthBenefits(
-          context,
-          'Provide your body with proteins to maintain muscles.',
-        ), // Передаем context
-      ],
-    );
-  }
-
-  Widget _dinnerContent(BuildContext context) {
-    return Column(
-      children: [
-        _buildMealItem(
-          context,
-          'Steamed Fish with Vegetables',
-          '350g',
-          '350 kcal',
-        ),
-        _buildMealItem(context, 'Greek Yogurt', '150g', '100 kcal'),
-        _buildHealthBenefits(
-          context,
-          'A light dinner for a comfortable sleep.',
-        ), // Передаем context
-      ],
-    );
-  }
-
-  Widget _snackContent(BuildContext context) {
-    return Column(
-      children: [
-        _buildMealItem(context, 'Fruit Smoothie', '200ml', '150 kcal'),
-        _buildMealItem(context, 'A Handful of Nuts', '30g', '180 kcal'),
-        _buildHealthBenefits(
-          context,
-          'Perfect for maintaining energy between meals.',
-        ), // Передаем context
-      ],
-    );
-  }
-
-  Widget _buildHealthBenefits(BuildContext context, String text) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Theme.of(context).primaryColor.withOpacity(0.1), // Цвет из темы
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.favorite,
-            color: Theme.of(context).primaryColor,
-          ), // Цвет из темы
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
-          ), // Стиль из темы
-        ],
-      ),
-    );
-  }
-
+  // Action buttons remain the same as they are UI elements not directly tied to API data
   Widget _buildActionButtons(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
@@ -278,17 +221,17 @@ class DietScreen extends StatelessWidget {
             context,
             'Notes',
             Icons.edit_note,
-          ), // Передаем context
+          ),
           _buildCustomButton(
             context,
             'BMI',
             Icons.calculate,
-          ), // Передаем context
+          ),
           _buildCustomButton(
             context,
             'Log food',
             Icons.add_box,
-          ), // Передаем context
+          ),
         ],
       ),
     );
@@ -298,8 +241,8 @@ class DietScreen extends StatelessWidget {
     return Column(
       children: [
         IconButton(
-          icon: Icon(icon, size: 30), // Размер иконки из темы
-          color: Theme.of(context).primaryColor, // Цвет иконки из темы
+          icon: Icon(icon, size: 30),
+          color: Theme.of(context).primaryColor,
           onPressed: () {
             // Action for button
           },
@@ -309,7 +252,7 @@ class DietScreen extends StatelessWidget {
           text,
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
             color: Theme.of(context).primaryColor,
-          ), // Стиль и цвет из темы
+          ),
         ),
       ],
     );

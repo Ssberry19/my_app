@@ -40,19 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // Убираем Container с градиентом
-      // body: Container(
-      //   decoration: const BoxDecoration(
-      //     gradient: LinearGradient(
-      //       begin: Alignment.topCenter,
-      //       end: Alignment.bottomCenter,
-      //       colors: [
-      //         Color(0xFFADD8E6),
-      //         Color(0xFF9370DB),
-      //         Color(0xFF6A5ACD),
-      //       ],
-      //     ),
-      //   ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -59,7 +59,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                 setState(() => widget.data.gender = value);
                 widget.data.notify(); // Уведомляем об изменении
               },
-              decoration: const InputDecoration(labelText: 'Gander'),
+              decoration: const InputDecoration(labelText: 'Gender'),
               validator: (value) {
                 if (value == null) return 'Choose gender';
                 return null;

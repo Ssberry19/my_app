@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       // Замените URL на ваш реальный эндпоинт
       final response = await http.post(
-        Uri.parse('https://10.0.2.2:8004/api/users/login/'),
+        Uri.parse('http://10.0.2.2:8004/api/users/login/'),
         body: {
           'email': _emailController.text,
           'password': _passwordController.text,
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        context.go('/home'); // Перенаправление при успехе
+        context.go('/main'); // Перенаправление при успехе
       } else {
         setState(() => _errorMessage = 'Authentication failed');
         if (response.statusCode == 400) {
