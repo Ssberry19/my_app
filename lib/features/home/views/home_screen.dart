@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // ignore: deprecated_member_use
                 color: Theme.of(
                   context,
-                ).primaryColor.withOpacity(0.2), // Цвет из темы
+                ).primaryColor, // Цвет из темы
               ),
             ),
           ],

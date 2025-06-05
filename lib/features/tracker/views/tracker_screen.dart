@@ -91,7 +91,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   // ignore: deprecated_member_use
                   color: Theme.of(
                     context,
-                  ).primaryColor.withOpacity(0.2), // Цвет из темы
+                  ).primaryColor, // Цвет из темы
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: BoxDecoration(

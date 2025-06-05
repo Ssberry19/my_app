@@ -154,8 +154,8 @@ class _GoalsStepState extends State<GoalsStep> {
       ActivityLevel.sedentary: 'Sedentary (little or no exercise)',
       ActivityLevel.light: 'Lightly active (1-3 days a week of light exercise)',
       ActivityLevel.moderate: 'Moderately active (3-5 days a week of moderate exercise)',
-      ActivityLevel.active: 'Active (6-7 days a week of vigorous exercise)',
-      ActivityLevel.veryActive: 'Extra active (twice a day or heavy physical job)',
+      ActivityLevel.high: 'Active (6-7 days a week of vigorous exercise)',
+      ActivityLevel.extreme: 'Very active (twice a day or heavy physical job)',
     }[level]!;
   }
 }

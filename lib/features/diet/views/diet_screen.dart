@@ -151,7 +151,7 @@ class _DietScreenState extends State<DietScreen> {
   Widget _buildInfoCard(String title, String value, Color color) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: color.withOpacity(0.1),
+      color: color,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(

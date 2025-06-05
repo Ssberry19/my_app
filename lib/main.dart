@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
 import 'main_screen.dart';
 import 'features/auth/views/registration_flow.dart';
 import 'features/auth/views/welcome_screen.dart';
 import 'features/auth/views/login_screen.dart';
-import 'core/theme/theme.dart'; // Убедитесь, что это правильный путь к вашему theme.dart
+import 'features/profile/models/profile_data.dart';
+import 'core/theme/theme.dart'; 
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider( // Оборачиваем здесь
+      create: (context) => ProfileData(),
+      child: const MyApp(), // Ваш корневой виджет
+    ),
+  );
 }
 
 final _router = GoRouter(
