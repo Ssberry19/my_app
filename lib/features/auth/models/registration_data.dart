@@ -18,5 +18,5 @@ class RegistrationData extends ChangeNotifier{
 }
 
 enum Gender { male, female }
-enum FitnessGoal { loseWeight, maintain, gainWeight, cutting }
+enum FitnessGoal { loseWeight, maintain, gainWeight }
 enum ActivityLevel { sedentary, light, moderate, high, extreme }

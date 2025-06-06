@@ -24,6 +24,15 @@ class _CredentialsStepState extends State<CredentialsStep> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
+  // Добавляем контроллер для поля пароля
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _passwordController.dispose(); // Важно освобождать ресурсы контроллера
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -49,6 +58,7 @@ class _CredentialsStepState extends State<CredentialsStep> {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -58,6 +68,7 @@ class _CredentialsStepState extends State<CredentialsStep> {
                       : Icons.visibility),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
+                errorMaxLines: 3, // <-- Добавьте эту строку
               ),
               validator: (value) {
                 if (value?.isEmpty ?? true) return 'Enter your password';
@@ -84,28 +95,35 @@ class _CredentialsStepState extends State<CredentialsStep> {
                 ),
               ),
               validator: (value) {
-                if (value != widget.data.password) {
+                // Сравниваем с текущим значением из контроллера
+                if (value != _passwordController.text) {
                   return 'Passwords do not match';
                 }
                 return null;
               },
+              onSaved: (value) => widget.data.password = value, // Возможно, это поле не нужно сохранять, если его роль только подтверждение
             ),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: widget.onBack,
-                  child: const Text('Back'),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: widget.onBack,
+                    child: const Text('Back'),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    // if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      widget.onNext();
-                    // }
-                  },
-                  child: const Text('Complete Registration'),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        widget.onNext();
+                      }
+                    },
+                    child: const Text('Complete Registration'),
+                  ),
                 ),
               ],
             ),

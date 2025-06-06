@@ -118,18 +118,23 @@ class _GoalsStepState extends State<GoalsStep> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: widget.onBack,
-                  child: const Text('Back'),
+                Expanded( // Добавляем Expanded
+                  child: ElevatedButton(
+                    onPressed: widget.onBack,
+                    child: const Text('Back'),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      widget.onNext();
-                    }
-                  },
-                  child: const Text('Next'),
+                const SizedBox(width: 16), // Добавляем отступ
+                Expanded( // Добавляем Expanded
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        widget.onNext();
+                      }
+                    },
+                    child: const Text('Next'),
+                  ),
                 ),
               ],
             ),
@@ -144,7 +149,6 @@ class _GoalsStepState extends State<GoalsStep> {
       FitnessGoal.loseWeight: 'Lose Weight',
       FitnessGoal.maintain: 'Maintain Weight',
       FitnessGoal.gainWeight: 'Gain Weight',
-      FitnessGoal.cutting: 'Build Muscle',
     }[goal]!;
   }
 
@@ -152,10 +156,10 @@ class _GoalsStepState extends State<GoalsStep> {
   String _activityLevelToString(ActivityLevel level) {
     return {
       ActivityLevel.sedentary: 'Sedentary (little or no exercise)',
-      ActivityLevel.light: 'Lightly active (1-3 days a week of light exercise)',
-      ActivityLevel.moderate: 'Moderately active (3-5 days a week of moderate exercise)',
-      ActivityLevel.high: 'Active (6-7 days a week of vigorous exercise)',
-      ActivityLevel.extreme: 'Very active (twice a day or heavy physical job)',
+      ActivityLevel.light: 'Light (1-3 days a week of light exercise)',
+      ActivityLevel.moderate: 'Moderate (3-5 days a week of moderate exercise)',
+      ActivityLevel.high: 'High (6-7 days a week of vigorous exercise)',
+      ActivityLevel.extreme: 'Extreme (twice a day or heavy physical job)',
     }[level]!;
   }
 }
