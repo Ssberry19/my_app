@@ -9,7 +9,9 @@ class RegistrationData extends ChangeNotifier{
   double? targetWeight;
   FitnessGoal? goal;
   ActivityLevel? activityLevel;
-  List<DateTime> menstrualCycles = [];
+  int? cycleLength; // Длина цикла
+  DateTime? lastPeriodDate; // Дата последней менструации
+  int? cycleDay;
   String? email;
   String? password;
   String? confirmPassword;

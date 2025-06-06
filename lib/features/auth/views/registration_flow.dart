@@ -149,7 +149,9 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       'targetWeight': _userData.targetWeight,
       'goal': _userData.goal?.toString().split('.').last, // Преобразуем Enum в строку
       'activityLevel': _userData.activityLevel?.toString().split('.').last, // Преобразуем Enum в строку
-      'menstrualCycles': _userData.menstrualCycles.map((date) => date.toIso8601String()).toList(),
+      'cycle_length': _userData.cycleLength, // Используем значение из _userData, если оно есть
+      'last_period_date':  _userData.lastPeriodDate?.toIso8601String().split('T').first,
+      'cycle_day':  _userData.cycleDay,
       'email': _userData.email,
       'password': _userData.password,
       // 'confirmPassword' не включаем, так как это поле только для фронтенд-валидации
