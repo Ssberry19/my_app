@@ -48,6 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Пример получения токена, если он сохранен в SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token'); // Ключ, по которому вы сохраняете токен
+      
+      // bla bla bla
 
       // Вам может потребоваться токен аутентификации здесь,
       // если ваш FastAPI эндпоинт защищен (например, 'Authorization': 'Bearer YOUR_AUTH_TOKEN').
