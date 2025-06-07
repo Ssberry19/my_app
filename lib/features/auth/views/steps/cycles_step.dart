@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Для форматирования даты
+import 'package:intl/intl.dart';
 import '../../models/registration_data.dart';
 
 class CyclesStep extends StatefulWidget {
@@ -21,23 +21,20 @@ class CyclesStep extends StatefulWidget {
 }
 
 class _CyclesStepState extends State<CyclesStep> {
-  int _cycleLength = 28; // По умолчанию 28 дней
+  int _cycleLength = 28;
   DateTime? _lastPeriodDate;
+  bool _showCycleDayWarning = false;
 
-  // Рассчитываемый день цикла
   int? get _cycleDay {
     if (_lastPeriodDate == null) return null;
     final today = DateTime.now();
     final difference = today.difference(_lastPeriodDate!).inDays;
-    // Если разница отрицательна (дата последней менструации в будущем), или разница очень большая
-    if (difference < 0) return 1; // Или выбросить ошибку
-    return (difference % _cycleLength) + 1; // День цикла
+    return difference + 1; // День цикла = количество дней с первого дня менструации + 1
   }
 
   @override
   void initState() {
     super.initState();
-    // Инициализируем значения из RegistrationData, если они есть
     if (widget.data.cycleLength != null) {
       _cycleLength = widget.data.cycleLength!;
     }
@@ -46,8 +43,7 @@ class _CyclesStepState extends State<CyclesStep> {
     }
   }
 
-  // Метод для сохранения данных и перехода к следующему шагу
-  void _saveAndProceed() {
+  Future<void> _saveAndProceed() async {
     if (_lastPeriodDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -57,28 +53,40 @@ class _CyclesStepState extends State<CyclesStep> {
       return;
     }
 
+    // Проверяем, не превышает ли текущий день цикла его длину
     if (_cycleDay != null && _cycleDay! > _cycleLength) {
-      showDialog(
+      setState(() {
+        _showCycleDayWarning = true;
+      });
+      
+      final bool? shouldProceed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Внимание"),
-          content: const Text("Возможно, начался новый цикл. Проверьте дату последней менструации."),
+          title: const Text("Attention"),
+          content: const Text("It seems a new cycle might have started. Would you like to adjust your cycle length or continue anyway?"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Adjust"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Continue"),
             ),
           ],
         ),
       );
-      return;
+
+      if (shouldProceed != true) {
+        return;
+      }
     }
 
     widget.data.cycleLength = _cycleLength;
     widget.data.lastPeriodDate = _lastPeriodDate;
-    widget.data.cycleDay = _cycleDay; // Сохраняем рассчитанный день цикла
+    widget.data.cycleDay = _cycleDay;
 
-    widget.onNext(); // Переходим к следующему шагу
+    widget.onNext();
   }
 
   @override
@@ -87,7 +95,6 @@ class _CyclesStepState extends State<CyclesStep> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Длина цикла
           Card(
             margin: const EdgeInsets.only(bottom: 16),
             child: Padding(
@@ -96,37 +103,35 @@ class _CyclesStepState extends State<CyclesStep> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Длина менструального цикла",
-                    style: Theme.of(context).textTheme.titleLarge, // Использовал titleLarge вместо headline6
+                    "Menstrual Cycle Length",
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const Text(
-                      "От первого дня одной менструации до первого дня следующей"),
+                  const Text("From the first day of one menstruation to the first day of the next"),
                   const SizedBox(height: 16),
                   Slider(
                     value: _cycleLength.toDouble(),
                     min: 21,
                     max: 38,
                     divisions: 14,
-                    label: "$_cycleLength дней",
+                    label: "$_cycleLength days",
                     onChanged: (value) {
                       setState(() {
                         _cycleLength = value.round();
+                        _showCycleDayWarning = false;
                       });
                     },
                   ),
                   Align(
                     alignment: Alignment.center,
                     child: Text(
-                      "$_cycleLength дней",
-                      style: Theme.of(context).textTheme.headlineSmall, // Использовал headlineSmall вместо headline5
+                      "$_cycleLength days",
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
-          // Дата последней менструации
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -134,42 +139,50 @@ class _CyclesStepState extends State<CyclesStep> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Последняя менструация",
-                    style: Theme.of(context).textTheme.titleLarge, // Использовал titleLarge вместо headline6
+                    "Last Menstruation",
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const Text("Выберите первый день последней менструации"),
+                  const Text("Select the first day of your last menstruation"),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () async {
                       final date = await showDatePicker(
                         context: context,
                         initialDate: _lastPeriodDate ?? DateTime.now().subtract(const Duration(days: 14)),
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)), // Можно ограничить год назад
+                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
                         lastDate: DateTime.now(),
                       );
                       if (date != null) {
                         setState(() {
                           _lastPeriodDate = date;
+                          _showCycleDayWarning = false;
                         });
                       }
                     },
                     child: Text(_lastPeriodDate == null
-                        ? "Выбрать дату"
+                        ? "Select Date"
                         : DateFormat('dd.MM.yyyy').format(_lastPeriodDate!)),
                   ),
                   if (_lastPeriodDate != null && _cycleDay != null) ...[
                     const SizedBox(height: 8),
                     Text(
-                      "Сегодня $_cycleDay день цикла",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      "Today is day $_cycleDay of your ${_cycleLength}-day cycle",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: _showCycleDayWarning ? Colors.red : null,
+                      ),
                     ),
+                    if (_showCycleDayWarning)
+                      const Text(
+                        "This exceeds your defined cycle length",
+                        style: TextStyle(color: Colors.red),
+                      ),
                   ],
                 ],
               ),
             ),
           ),
-
-          const Spacer(), // Занимает все доступное вертикальное пространство
+          const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -182,7 +195,7 @@ class _CyclesStepState extends State<CyclesStep> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _saveAndProceed, // Используем новую функцию
+                  onPressed: _saveAndProceed,
                   child: const Text('Next'),
                 ),
               ),

@@ -24,12 +24,23 @@ class _CredentialsStepState extends State<CredentialsStep> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
-  // Добавляем контроллер для поля пароля
-  final TextEditingController _passwordController = TextEditingController();
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.data.email);
+    _passwordController = TextEditingController(text: widget.data.password);
+    _confirmPasswordController = TextEditingController();
+  }
 
   @override
   void dispose() {
-    _passwordController.dispose(); // Важно освобождать ресурсы контроллера
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -42,74 +53,82 @@ class _CredentialsStepState extends State<CredentialsStep> {
         child: Column(
           children: [
             TextFormField(
+              controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 labelText: 'Email',
-                hintText: 'example@mail.com',
+                hintText: 'e.g. user@example.com',
               ),
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Enter your email';
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
-                  return 'Wrong format of email';
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email address';
+                }
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  return 'Please enter a valid email address';
                 }
                 return null;
               },
-              onSaved: (value) => widget.data.email = value,
+              onChanged: (value) => widget.data.email = value,
             ),
             const SizedBox(height: 20),
             TextFormField(
               controller: _passwordController,
-              obscureText: _obscurePassword,
               decoration: InputDecoration(
                 labelText: 'Password',
+                hintText: 'Enter password (min 8 characters)',
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword
-                      ? Icons.visibility_off
-                      : Icons.visibility),
+                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
-                errorMaxLines: 3, // <-- Добавьте эту строку
+                errorMaxLines: 3,
               ),
+              obscureText: _obscurePassword,
               validator: (value) {
-                if (value?.isEmpty ?? true) return 'Enter your password';
-                if (value!.length < 8) return 'Minimum 8 characters required';
-                if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$')
-                    .hasMatch(value)) {
-                  return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
+                }
+                if (value.length < 8) {
+                  return 'Password must be at least 8 characters long';
+                }
+                if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$').hasMatch(value)) {
+                  return 'Password must contain:\n- At least one uppercase letter\n- At least one lowercase letter\n- At least one number';
                 }
                 return null;
               },
-              onSaved: (value) => widget.data.password = value,
+              onChanged: (value) => widget.data.password = value,
             ),
             const SizedBox(height: 20),
             TextFormField(
-              obscureText: _obscureConfirm,
+              controller: _confirmPasswordController,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                hintText: 'Re-enter your password',
+                hintText: 'Repeat password',
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirm
-                      ? Icons.visibility_off
-                      : Icons.visibility),
+                  icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                 ),
               ),
+              obscureText: _obscureConfirm,
               validator: (value) {
-                // Сравниваем с текущим значением из контроллера
+                if (value == null || value.isEmpty) {
+                  return 'Please confirm your password';
+                }
                 if (value != _passwordController.text) {
                   return 'Passwords do not match';
                 }
                 return null;
               },
-              onSaved: (value) => widget.data.password = value, // Возможно, это поле не нужно сохранять, если его роль только подтверждение
+              onChanged: (value) => widget.data.confirmPassword = value,
             ),
+            const SizedBox(height: 20),
+            _buildPasswordRequirements(),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: widget.onBack,
+                    onPressed: widget.currentStepIndex > 0 ? widget.onBack : null,
                     child: const Text('Back'),
                   ),
                 ),
@@ -118,7 +137,6 @@ class _CredentialsStepState extends State<CredentialsStep> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
                         widget.onNext();
                       }
                     },
@@ -130,6 +148,43 @@ class _CredentialsStepState extends State<CredentialsStep> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPasswordRequirements() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Password must contain:',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '• At least 8 characters',
+          style: TextStyle(
+            color: _passwordController.text.length >= 8 ? Colors.green : Colors.grey,
+          ),
+        ),
+        Text(
+          '• At least one uppercase letter',
+          style: TextStyle(
+            color: RegExp(r'[A-Z]').hasMatch(_passwordController.text) ? Colors.green : Colors.grey,
+          ),
+        ),
+        Text(
+          '• At least one lowercase letter',
+          style: TextStyle(
+            color: RegExp(r'[a-z]').hasMatch(_passwordController.text) ? Colors.green : Colors.grey,
+          ),
+        ),
+        Text(
+          '• At least one number',
+          style: TextStyle(
+            color: RegExp(r'[0-9]').hasMatch(_passwordController.text) ? Colors.green : Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 }

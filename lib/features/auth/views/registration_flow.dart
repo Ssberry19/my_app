@@ -141,7 +141,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     final backendUrl = dotenv.env['BACKEND_URL'];
     
     final Map<String, dynamic> registrationPayload = {
-      'fullName': _userData.fullName,
+      'fullName': _userData.username,
       'gender': _userData.gender?.toString().split('.').last, // Преобразуем Enum в строку
       'birthDate': _userData.birthDate?.toIso8601String(), // ISO 8601 формат для даты
       'height': _userData.height,
@@ -149,6 +149,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       'targetWeight': _userData.targetWeight,
       'goal': _userData.goal?.toString().split('.').last, // Преобразуем Enum в строку
       'activityLevel': _userData.activityLevel?.toString().split('.').last, // Преобразуем Enum в строку
+      'allergens': _userData.allergens, // Список аллергенов
       'cycle_length': _userData.cycleLength, // Используем значение из _userData, если оно есть
       'last_period_date':  _userData.lastPeriodDate?.toIso8601String().split('T').first,
       'cycle_day':  _userData.cycleDay,

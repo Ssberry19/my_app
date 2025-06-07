@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/registration_data.dart'; // Assuming this path
+import '../../models/registration_data.dart';
 
 class GoalsStep extends StatefulWidget {
   final RegistrationData data;
@@ -21,145 +21,133 @@ class GoalsStep extends StatefulWidget {
 
 class _GoalsStepState extends State<GoalsStep> {
   final _formKey = GlobalKey<FormState>();
-  double? _targetBMI;
-
-  @override
-  void initState() {
-    super.initState();
-    _calculateTargetBMI();
-  }
-
-  void _calculateTargetBMI() {
-    if (widget.data.height != null && widget.data.targetWeight != null) {
-      final heightM = widget.data.height! / 100;
-      setState(() {
-        _targetBMI = widget.data.targetWeight! / (heightM * heightM);
-      });
-    }
-  }
+  final List<String> allergens = ["nuts", "eggs", "seafood", "dairy", "gluten"];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            DropdownButtonFormField<FitnessGoal>(
-              value: widget.data.goal,
-              items: FitnessGoal.values.map((goal) {
-                return DropdownMenuItem(
-                  value: goal,
-                  child: Text(_goalToString(goal)),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => widget.data.goal = value),
-              decoration: const InputDecoration(labelText: 'Goal'),
-              validator: (value) {
-                if (value == null) return 'Choose a goal';
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Goal Weight (kg)',
-                hintText: '60',
-              ),
-              validator: (value) {
-                if (value?.isEmpty ?? true) return 'Enter target weight';
-                if (widget.data.goal == FitnessGoal.loseWeight && widget.data.weight != null) {
-                  final currentWeight = widget.data.weight!;
-                  final targetWeight = double.tryParse(value!);
-                  if (targetWeight == null || targetWeight >= currentWeight) {
-                    return 'Target weight must be less than current weight for weight loss goal';
-                  }
-                }
-                final parsed = double.tryParse(value!);
-                if (parsed == null || parsed <= 0) return 'Wrong format';
-                return null;
-              },
-              onChanged: (value) {
-                widget.data.targetWeight = double.tryParse(value);
-                _calculateTargetBMI();
-                
-              },
-            ),
-            const SizedBox(height: 20),
-            // New Dropdown for Activity Level
-            DropdownButtonFormField<ActivityLevel>(
-              value: widget.data.activityLevel,
-              items: ActivityLevel.values.map((level) {
-                return DropdownMenuItem(
-                  value: level,
-                  child: Text(_activityLevelToString(level)),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => widget.data.activityLevel = value),
-              decoration: const InputDecoration(labelText: 'Activity Level'),
-              validator: (value) {
-                if (value == null) return 'Choose an activity level';
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            if (_targetBMI != null)
-              Text(
-                'BMI in goal weight: ${_targetBMI!.toStringAsFixed(1)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-              ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded( // Добавляем Expanded
-                  child: ElevatedButton(
-                    onPressed: widget.onBack,
-                    child: const Text('Back'),
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Activity Level Dropdown
+                          DropdownButtonFormField<ActivityLevel>(
+                            value: widget.data.activityLevel,
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Activity Level',
+                              border: OutlineInputBorder(),
+                            ),
+                            items: ActivityLevel.values.map((ActivityLevel level) {
+                              return DropdownMenuItem<ActivityLevel>(
+                                value: level,
+                                child: Text(
+                                  _activityLevelToString(level),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (ActivityLevel? newValue) {
+                              setState(() {
+                                widget.data.activityLevel = newValue;
+                              });
+                            },
+                            validator: (value) => 
+                                value == null ? 'Please select an activity level' : null,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Allergens selection
+                          const Text(
+                            'Select your allergens:',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: allergens.map((allergen) {
+                              return FilterChip(
+                                label: Text(allergen),
+                                selected: widget.data.allergens?.contains(allergen) ?? false,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    widget.data.allergens ??= [];
+                                    if (selected) {
+                                      widget.data.allergens!.add(allergen);
+                                    } else {
+                                      widget.data.allergens!.remove(allergen);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Кнопки навигации - теперь без Spacer()
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: widget.currentStepIndex > 0 ? widget.onBack : null,
+                                    child: const Text('Back'),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        widget.onNext();
+                                      }
+                                    },
+                                    child: const Text('Next'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16), // Добавляем отступ
-                Expanded( // Добавляем Expanded
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        widget.onNext();
-                      }
-                    },
-                    child: const Text('Next'),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  String _goalToString(FitnessGoal goal) {
-    return {
-      FitnessGoal.loseWeight: 'Lose Weight',
-      FitnessGoal.maintain: 'Maintain Weight',
-      FitnessGoal.gainWeight: 'Gain Weight',
-    }[goal]!;
-  }
-
-  // Helper method to convert ActivityLevel enum to a display string
   String _activityLevelToString(ActivityLevel level) {
-    return {
-      ActivityLevel.sedentary: 'Sedentary (little or no exercise)',
-      ActivityLevel.light: 'Light (1-3 days a week of light exercise)',
-      ActivityLevel.moderate: 'Moderate (3-5 days a week of moderate exercise)',
-      ActivityLevel.high: 'High (6-7 days a week of vigorous exercise)',
-      ActivityLevel.extreme: 'Extreme (twice a day or heavy physical job)',
-    }[level]!;
+    switch (level) {
+      case ActivityLevel.sedentary:
+        return 'Sedentary (little or no exercise)';
+      case ActivityLevel.light:
+        return 'Lightly active (1-3 days a week of light exercise)';
+      case ActivityLevel.moderate:
+        return 'Moderately active (3-5 days a week of moderate exercise)';
+      case ActivityLevel.high:
+        return 'Active (6-7 days a week of vigorous exercise)';
+      case ActivityLevel.extreme:
+        return 'Very active (twice a day or heavy physical job)';
+    }
   }
 }
