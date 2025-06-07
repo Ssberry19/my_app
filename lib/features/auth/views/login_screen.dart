@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert'; // Required for jsonDecode and jsonEncode
+import 'package:shared_preferences/shared_preferences.dart'; // shared_preferences
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,6 +40,23 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
+
+        print('Successful profile API response body: ${response.body}');
+        final responseData = jsonDecode(response.body);
+        final String? token = responseData['token'];
+
+        if (token != null) {
+          // Save token to SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', token);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Token saved successfully!')),
+          );
+        } else {
+          throw Exception('Token not found in response');
+        }
+        // response.
         if (!mounted) return;
         context.go('/main'); // Перенаправление при успехе
       } else {

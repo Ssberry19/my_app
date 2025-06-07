@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Для управления состоянием
 import 'package:http/http.dart' as http; // Для HTTP-запросов
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Для доступа к .env переменным
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/profile_data.dart'; // Путь к вашему profile_data.dart
 import '../models/user_profile.dart'; // Путь к вашему user_profile.dart
@@ -43,6 +45,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     print('Attempting to fetch profile from: $apiUrl');
 
     try {
+      // Пример получения токена, если он сохранен в SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token'); // Ключ, по которому вы сохраняете токен
+
       // Вам может потребоваться токен аутентификации здесь,
       // если ваш FastAPI эндпоинт защищен (например, 'Authorization': 'Bearer YOUR_AUTH_TOKEN').
       final response = await http.post(
@@ -50,6 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': 'Token $token',
           // Пример, если нужен токен: 'Authorization': 'Bearer ВАШ_ТОКЕН',
         },
       );
@@ -79,6 +86,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+    // Новая функция для выполнения выхода из системы
+  Future<void> _performLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token'); // Удаляем токен аутентификации
+    // Возможно, очистите другие данные пользователя, если они хранятся в SharedPreferences
+
+    // Очищаем данные профиля в провайдере
+    Provider.of<ProfileData>(context, listen: false).clearUserProfile();
+
+    // Перенаправляем на страницу Welcome
+    if (mounted) {
+      context.go('/welcome');
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     // Подписываемся на изменения в ProfileData с помощью Consumer

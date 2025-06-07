@@ -49,5 +49,10 @@ class ProfileData extends ChangeNotifier {
     notifyListeners(); // Уведомляем слушателей об изменении данных
   }
 
+  void clearUserProfile() {
+    _userProfile = null; // Очищаем данные профиля
+    notifyListeners(); // Уведомляем слушателей об изменении
+  }
+
   void notify() => notifyListeners();
 }

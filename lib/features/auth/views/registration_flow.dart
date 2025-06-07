@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http; // Добавляем импорт для HTTP
 import 'dart:convert'; // Добавляем импорт для JSON
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // shared_preferences
 
 class RegistrationFlow extends StatefulWidget {
   const RegistrationFlow({super.key});
@@ -140,8 +141,12 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     // Получаем BACKEND_URL из .env или используем значение по умолчанию
     final backendUrl = dotenv.env['BACKEND_URL'];
     
+    // Пример получения токена, если он сохранен в SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token'); // Ключ, по которому вы сохраняете токен
+
     final Map<String, dynamic> registrationPayload = {
-      'fullName': _userData.username,
+      'username': _userData.username,
       'gender': _userData.gender?.toString().split('.').last, // Преобразуем Enum в строку
       'birthDate': _userData.birthDate?.toIso8601String(), // ISO 8601 формат для даты
       'height': _userData.height,
@@ -163,6 +168,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
         Uri.parse('$backendUrl/api/users/create/'), // Убедитесь, что это ваш реальный эндпоинт для регистрации
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Token $token'
         },
         body: jsonEncode(registrationPayload),
       );
@@ -170,6 +176,21 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       if (mounted) { // Проверяем, что виджет все еще находится в дереве
         if (response.statusCode == 200 || response.statusCode == 201) {
           print('Registration successful: ${response.body}');
+          final responseData = jsonDecode(response.body);
+          final String? token = responseData['token'];
+
+          if (token != null) {
+          // Save token to SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', token);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Token saved successfully!')),
+          );
+          } else {
+            throw Exception('Token not found in response');
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registration is done succesfully!')),
           );
