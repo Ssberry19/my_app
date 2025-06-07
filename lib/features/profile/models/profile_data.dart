@@ -9,7 +9,7 @@ enum ActivityLevel { sedentary, light, moderate, active, veryActive }
 
 class ProfileData extends ChangeNotifier {
   // Поля для сбора данных в форме (могут быть nullable по умолчанию)
-  String? fullName;
+  String? username;
   Gender? gender;
   DateTime? birthDate;
   double? height;
@@ -17,7 +17,10 @@ class ProfileData extends ChangeNotifier {
   double? targetWeight;
   FitnessGoal? goal;
   ActivityLevel? activityLevel;
-  List<DateTime> menstrualCycles = []; // Это может быть пустым списком
+  List<String>? allergens = []; // Добавлено поле для аллергенов
+  int? cycleLength;
+  DateTime? lastPeriodDate;
+  int? cycleDay;
   String? email;
   String? password;
   String? confirmPassword;
@@ -33,7 +36,7 @@ class ProfileData extends ChangeNotifier {
     // Обновляем локальные поля, если _userProfile не null.
     // Это полезно, если вы хотите использовать те же поля для отображения и редактирования.
     if (data != null) {
-      fullName = data.fullName;
+      username = data.username;
       // Преобразование строки в enum, если есть
       gender = data.gender != null ? Gender.values.firstWhere((e) => e.toString().split('.').last == data.gender, orElse: () => Gender.male) : null;
       birthDate = data.birthDate;
@@ -42,7 +45,9 @@ class ProfileData extends ChangeNotifier {
       targetWeight = data.targetWeight;
       goal = data.goal != null ? FitnessGoal.values.firstWhere((e) => e.toString().split('.').last == data.goal, orElse: () => FitnessGoal.maintain) : null;
       activityLevel = data.activityLevel != null ? ActivityLevel.values.firstWhere((e) => e.toString().split('.').last == data.activityLevel, orElse: () => ActivityLevel.sedentary) : null;
-      menstrualCycles = data.menstrualCycles ?? []; // Присваиваем пустой список, если null
+      cycleLength = data.cycleLength; // Используем значение из _userData, если оно есть
+      lastPeriodDate = data.lastPeriodDate;
+      cycleDay = data.cycleDay; // Присваиваем пустой список, если null
       email = data.email;
       // Пароль, конечно, не должен возвращаться с бэкенда и здесь не обновляется
     }
