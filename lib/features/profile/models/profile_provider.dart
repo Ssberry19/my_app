@@ -10,21 +10,27 @@ enum ActivityLevel { sedentary, light, moderate, active, veryActive }
 class ProfileData extends ChangeNotifier {
   // Поля для сбора данных в форме (могут быть nullable по умолчанию)
   String? username;
-  Gender? gender;
-  DateTime? birthDate;
+  String? email;
+  Gender? gender; //NOT editable
+  DateTime? birthDate; //NOT editable
+  int? age; //NOT editable
+
   double? height;
-  double? weight;
+  double? weight; //MAIN
+  ActivityLevel? activityLevel; //MAIN
   double? targetWeight;
   FitnessGoal? goal;
-  ActivityLevel? activityLevel;
-  List<String>? allergens = []; // Добавлено поле для аллергенов
-  int? cycleLength;
-  DateTime? lastPeriodDate;
-  int? cycleDay;
-  String? email;
+
+  int? cycleLength; //MAIN
+  DateTime? lastPeriodDate; //MAIN
+  int? cycleDay; //NOT editable
+  String? menstrualPhase; //NOT editable
+  
+  List<String>? allergens;
+  double? bmi; // Add BMI field
+  double? bfp; // Add body fat percentage field
   String? password;
   String? confirmPassword;
-
   // Поле для хранения данных, полученных с бэкенда
   UserProfileData? _userProfile;
 
@@ -49,7 +55,11 @@ class ProfileData extends ChangeNotifier {
       lastPeriodDate = data.lastPeriodDate;
       cycleDay = data.cycleDay; // Присваиваем пустой список, если null
       email = data.email;
-      // Пароль, конечно, не должен возвращаться с бэкенда и здесь не обновляется
+      age = data.age;      // Пароль, конечно, не должен возвращаться с бэкенда и здесь не обновляется
+      menstrualPhase = data.menstrualPhase;
+      bmi = data.bmi;
+      bfp = data.bfp;
+      allergens = data.allergens ?? []; // Присваиваем пустой список, если null
     }
     notifyListeners(); // Уведомляем слушателей об изменении данных
   }

@@ -25,20 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'), // Стиль берется из темы
-        // backgroundColor: Colors.deepPurple, // Удаляем
-        // elevation: 0, // Удаляем
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.notifications_none,
-              color: Theme.of(context).appBarTheme.foregroundColor,
-            ), // Цвет иконки из темы
-            onPressed: () {
-              // TODO: Handle notifications
-            },
-          ),
-        ],
+        title: const Text('Home'), 
       ),
 
       body: SingleChildScrollView(

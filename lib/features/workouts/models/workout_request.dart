@@ -7,9 +7,10 @@ String workoutRequestToJson(WorkoutRequest data) => json.encode(data.toJson());
 class WorkoutRequest {
   double heightCm;
   double weightKg;
-  int age;
-  String gender;
   String goal;
+  
+    String gender;
+    int age;
   String menstrualPhase;
   double bodyFatPercentage;
   int days;

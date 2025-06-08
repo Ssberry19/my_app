@@ -1,4 +1,5 @@
-// screens/profile_screen.dart
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Для управления состоянием
 import 'package:http/http.dart' as http; // Для HTTP-запросов
@@ -19,6 +20,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = false;
   String? _errorMessage;
+  bool _showMenstrualPhase = false;
 
   @override
   void initState() {
@@ -94,11 +96,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await prefs.remove('auth_token'); // Удаляем токен аутентификации
     // Возможно, очистите другие данные пользователя, если они хранятся в SharedPreferences
 
-    // Очищаем данные профиля в провайдере
-    Provider.of<ProfileData>(context, listen: false).clearUserProfile();
-
     // Перенаправляем на страницу Welcome
     if (mounted) {
+      // Очищаем данные профиля в провайдере
+      Provider.of<ProfileData>(context, listen: false).clearUserProfile();
       context.go('/welcome');
     }
   }
@@ -155,15 +156,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildProfileRow(context, 'Email', userProfile.email ?? 'Empty', Icons.email),
                           _buildProfileRow(context, 'Gender', userProfile.gender ?? 'Empty', Icons.transgender),
                           _buildProfileRow(context, 'Birth Date', userProfile.birthDate?.toIso8601String().split('T').first ?? 'Empty', Icons.calendar_today),
+                          _buildProfileRow(context, 'Age', '${userProfile.age ?? 'Empty'} years', Icons.cake),
                           _buildProfileRow(context, 'Height', '${userProfile.height ?? 'Empty'} cm', Icons.height),
                           _buildProfileRow(context, 'Weight', '${userProfile.weight ?? 'Empty'} kg', Icons.fitness_center),
-                          _buildProfileRow(context, 'Goal Weight', '${userProfile.targetWeight ?? 'Empty'} kg', Icons.flag),
+                          
                           
                           const SizedBox(height: 20),
                           _buildSectionHeader(context, 'Additional info'),
                           _buildProfileRow(context, 'Goal', userProfile.goal ?? 'Empty', Icons.track_changes),
+                          _buildProfileRow(context, 'Goal Weight', '${userProfile.targetWeight ?? 'Empty'} kg', Icons.flag),
                           _buildProfileRow(context, 'Activity level', userProfile.activityLevel ?? 'Empty', Icons.directions_run),
                           
+                          _buildProfileRow(
+                            context,
+                            'Dietary Allergens',
+                            userProfile.allergens != null && userProfile.allergens!.isNotEmpty
+                                ? userProfile.allergens!.join(', ') // Joins the list of strings with a comma and space
+                                : 'None', // Display 'None' if the list is null or empty
+                            Icons.restaurant_menu,
+                          ),
                           // Проверяем, что пол женский, и что список циклов не null и не пуст.
                           if (userProfile.gender == 'female') ...[
                             const SizedBox(height: 20),
@@ -173,6 +184,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _buildProfileRow(context, 'Last Period Date', userProfile.lastPeriodDate!.toIso8601String().split('T').first, Icons.calendar_today), // Added null check (!) here
                                 _buildProfileRow(context, 'Cycle length', '${userProfile.cycleLength}', Icons.timelapse),
                                 _buildProfileRow(context, 'Current cycle day', '${userProfile.cycleDay}', Icons.calendar_month),
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showMenstrualPhase = !_showMenstrualPhase;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(40), // Make button wider
+                                  ),
+                                  child: Text(_showMenstrualPhase ? 'Hide current phase' : 'Learn your current phase'),
+                                ),
+                                if (_showMenstrualPhase)
+                                  _buildProfileRow(context, 'Current Phase', userProfile.menstrualPhase ?? 'Not available', Icons.healing),
                               ]
                             else
                               _buildProfileRow(context, 'Menstrual Cycles', 'Cycle data is empty', Icons.calendar_month),
@@ -182,10 +207,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildListTile(context, 'Edit Profile', Icons.edit, () {
                             // TODO: Реализовать навигацию на экран редактирования профиля
                             print('Edit Profile is tapped');
-                          }),
-                          _buildListTile(context, 'Edit Password', Icons.lock, () {
-                            // TODO: Реализовать навигацию на экран изменения пароля
-                            print('Edit Password is tapped');
                           }),
                           // Добавляем кнопку выхода
                           _buildListTile(context, 'Logout', Icons.logout, _performLogout),
@@ -236,16 +257,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         label,
         style: Theme.of(context).textTheme.bodyLarge,
       ),
-      trailing: Text(
-        value,
-        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: Theme.of(context).primaryColor,
-          fontWeight: FontWeight.w500,
+      trailing: SizedBox( // Use SizedBox to constrain the width for wrapping
+        width: MediaQuery.of(context).size.width * 0.4, // Adjust this percentage as needed
+        child: Text(
+          value,
+          textAlign: TextAlign.right, // Align the text to the right
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
-
+  
   Widget _buildListTile(
     BuildContext context,
     String title,

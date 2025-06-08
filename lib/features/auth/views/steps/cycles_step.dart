@@ -166,7 +166,7 @@ class _CyclesStepState extends State<CyclesStep> {
                   if (_lastPeriodDate != null && _cycleDay != null) ...[
                     const SizedBox(height: 8),
                     Text(
-                      "Today is day $_cycleDay of your ${_cycleLength}-day cycle",
+                      "Today is day $_cycleDay of your $_cycleLength-day cycle",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _showCycleDayWarning ? Colors.red : null,
