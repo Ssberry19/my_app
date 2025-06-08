@@ -44,10 +44,15 @@ class UserProfileData {
   final double? targetWeight;
   final String? goal;
   final String? activityLevel;
+  final List<String>? allergens;
   int? cycleLength;
   DateTime? lastPeriodDate;
   int? cycleDay;
   final String? email;
+  final int? age; // Добавлено поле для возраста
+  final String? menstrualPhase;
+  final double? bmi; // Добавлено поле для индекса массы тела
+  final double? bfp; // Добавлено поле для процента жира в организме
 
   UserProfileData({
     this.username,
@@ -58,10 +63,15 @@ class UserProfileData {
     this.targetWeight,
     this.goal,
     this.activityLevel,
+    this.allergens,
     this.lastPeriodDate,
     this.cycleLength,
     this.cycleDay,
     this.email,
+    this.age, // Добавлено поле для возраста
+    this.menstrualPhase,
+    this.bmi, // Добавлено поле для индекса массы тела
+    this.bfp, // Добавлено поле для процента жира в организме
   });
 
   // Фабричный конструктор для создания объекта из JSON
@@ -74,11 +84,17 @@ class UserProfileData {
         targetWeight: json["targetWeight"]?.toDouble(),
         goal: json["goal"],
         activityLevel: json["activityLevel"],
-        // Специальная обработка для List<DateTime>
+        allergens: json["allergens"] == null
+            ? []
+            : List<String>.from(json["allergens"].map((x) => x)), // <--- ADD THIS FOR PARSING
         lastPeriodDate: json["lastPeriodDate"] != null ? DateTime.parse(json["lastPeriodDate"]) : null,
         cycleLength: json["cycleLength"],
         cycleDay: json["cycleDay"],
         email: json["email"],
+        age: json["age"], // Приводим к int, если есть
+        menstrualPhase: json["menstrualPhase"], 
+        bmi: json["bmi"]?.toDouble(), // Приводим к double, если есть
+        bfp: json["bfp"]?.toDouble(), // Приводим к double, если есть
       );
 
   // Метод для преобразования объекта в JSON
@@ -91,9 +107,14 @@ class UserProfileData {
         "targetWeight": targetWeight,
         "goal": goal,
         "activityLevel": activityLevel,
+        "allergens": allergens == null ? [] : List<dynamic>.from(allergens!.map((x) => x)),
         "lastPeriodDate": lastPeriodDate?.toIso8601String(),
         "cycleLength": cycleLength, 
         "cycleDay": cycleDay,
         "email": email,
+        "age": age, // Возраст сохраняем как есть
+        "menstrualPhase": menstrualPhase,
+        "bmi": bmi, // Индекс массы тела сохраняем как есть
+        "bfp": bfp, // Процент жира в организме сохраняем как есть
       };
 }
