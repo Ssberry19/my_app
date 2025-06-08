@@ -140,10 +140,6 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
     // Получаем BACKEND_URL из .env или используем значение по умолчанию
     final backendUrl = dotenv.env['BACKEND_URL'];
-    
-    // Пример получения токена, если он сохранен в SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token'); // Ключ, по которому вы сохраняете токен
 
     final Map<String, dynamic> registrationPayload = {
       'username': _userData.username,
@@ -184,16 +180,20 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
 
+          if (mounted) { // Проверяем, что виджет все еще находится в дереве
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Token saved successfully!')),
           );
+          }
           } else {
             throw Exception('Token not found in response');
           }
           
+          if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registration is done succesfully!')),
           );
+          }
           context.go('/main'); // Переходим на главный экран после успешной регистрации
         } else {
           print('Registration failed: ${response.statusCode} - ${response.body}');

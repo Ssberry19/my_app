@@ -1,4 +1,5 @@
-// screens/profile_screen.dart
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Для управления состоянием
 import 'package:http/http.dart' as http; // Для HTTP-запросов
@@ -92,11 +93,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await prefs.remove('auth_token'); // Удаляем токен аутентификации
     // Возможно, очистите другие данные пользователя, если они хранятся в SharedPreferences
 
-    // Очищаем данные профиля в провайдере
-    Provider.of<ProfileData>(context, listen: false).clearUserProfile();
-
     // Перенаправляем на страницу Welcome
     if (mounted) {
+      // Очищаем данные профиля в провайдере
+      Provider.of<ProfileData>(context, listen: false).clearUserProfile();
       context.go('/welcome');
     }
   }

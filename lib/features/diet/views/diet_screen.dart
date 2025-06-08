@@ -1,4 +1,6 @@
 // features/diet/views/diet_screen.dart
+// ignore_for_file: avoid_print, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Импортируем provider
 import '../models/diet_plan_provider.dart'; // Импортируем DietPlanProvider
@@ -276,7 +278,7 @@ class _DietScreenState extends State<DietScreen> {
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const Divider(height: 20, thickness: 1),
-        ...dayPlan.meals.map((meal) => _buildMealItem(meal)).toList(),
+        ...dayPlan.meals.map((meal) => _buildMealItem(meal)),
       ],
     );
   }
