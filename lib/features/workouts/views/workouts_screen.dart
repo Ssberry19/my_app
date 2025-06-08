@@ -422,8 +422,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                 _buildInfoRow(Icons.repeat, 'Sets: ${exercise.sets}', context),
                 _buildInfoRow(Icons.directions_run, 'Reps: ${exercise.reps}', context),
                 _buildInfoRow(Icons.flag, 'Goal: ${exercise.target}', context),
-                if (exercise.notes != null && exercise.notes!.isNotEmpty)
-                  _buildInfoRow(Icons.notes, 'Notes: ${exercise.notes}', context),
+                _buildInfoRow(Icons.notes, 'Notes: ${exercise.notes}', context),
                 _buildInfoRow(Icons.local_fire_department, 'Calories Burned: ${exercise.caloriesBurned.toStringAsFixed(2)} kcal', context),
               ],
             ),

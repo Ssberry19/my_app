@@ -356,7 +356,7 @@ class _DietScreenState extends State<DietScreen> {
                     ),
                     Text(
                       meal.description, // Описание блюда
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -390,7 +390,7 @@ class _DietScreenState extends State<DietScreen> {
       label: Text(text),
       visualDensity: VisualDensity.compact,
       backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Полупрозрачный цвет темы
-      labelStyle: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12), // Цвет текста чипа
+      labelStyle: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14), // Цвет текста чипа
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
     );
   }
