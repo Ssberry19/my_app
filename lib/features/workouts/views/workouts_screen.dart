@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../models/workout_request.dart'; // Убедитесь, что путь верен
-import '../models/workout_response.dart'; // Убедитесь, что путь верен
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // <-- Добавлен импорт для dotenv
+import '../models/workout_request.dart';
+import '../models/workout_response.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WorkoutPlanPage extends StatefulWidget {
   const WorkoutPlanPage({super.key});
@@ -17,16 +17,16 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   WorkoutResponse? _workoutResponse;
   bool _isLoading = false;
   String? _errorMessage;
+  int _selectedDayIndex = 0; // Добавляем состояние для выбранного дня
 
-  // Примерные данные для отправки, как в вашем запросе
   final WorkoutRequest _requestData = WorkoutRequest(
-    heightCm: 175,
-    weightKg: 75,
+    heightCm: 180,
+    weightKg: 80,
     age: 21,
-    gender: "female",
+    gender: "male",
     goal: "weight_loss",
-    menstrualPhase: "luteal",
-    bodyFatPercentage: 18.0,
+    menstrualPhase: "",
+    bodyFatPercentage: 38.0,
     days: 7,
   );
 
@@ -36,14 +36,12 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       _errorMessage = null;
     });
 
-    // Получаем базовый URL из .env файла.
-    // Если .env файл не загружен или переменная отсутствует, используем localhost как запасной вариант.
-    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000'; 
+    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000';
     const String endpoint = '/workout-calories/generate';
-    final String apiUrl = '$baseUrl$endpoint'; // Комбинируем базовый URL и эндпоинт
-    
-    print('Attempting to connect to: $apiUrl'); // Для отладки, чтобы видеть, куда идет запрос
-    print('ALISHER: $workoutRequestToJson(_requestData)'); // Выводим данные запроса для отладки
+    final String apiUrl = '$baseUrl$endpoint';
+
+    print('Attempting to connect to: $apiUrl');
+    print('ALISHER: ${workoutRequestToJson(_requestData)}');
 
     try {
       final response = await http.post(
@@ -52,27 +50,27 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: workoutRequestToJson(_requestData), // Здесь данные запроса преобразуются в JSON
+        body: workoutRequestToJson(_requestData),
       );
 
       if (response.statusCode == 200) {
-        // Успешный ответ
         setState(() {
-          _workoutResponse = workoutResponseFromJson(response.body); // Здесь JSON-ответ от FastAPI преобразуется в Dart-объекты
+          _workoutResponse = workoutResponseFromJson(response.body);
+          // Сбросим выбранный день, если количество дней изменилось
+          if (_selectedDayIndex >= (_workoutResponse?.workoutPlan.length ?? 0)) {
+            _selectedDayIndex = 0;
+          }
         });
       } else {
-        // Ошибка сервера или невалидный ответ
         setState(() {
-          _errorMessage =
-              'Ошибка ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
+          _errorMessage = 'Ошибка ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
         });
       }
     } catch (e) {
-      // Ошибка сети (например, сервер недоступен, брандмауэр блокирует, таймаут)
       setState(() {
         _errorMessage = 'Could not connect to server: $e';
       });
-      print('Network/Connection error: $e'); // Дополнительный вывод ошибки в консоль
+      print('Network/Connection error: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -83,7 +81,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   @override
   void initState() {
     super.initState();
-    _fetchWorkoutPlan(); // Автоматически запрашиваем данные при загрузке страницы
+    _fetchWorkoutPlan();
   }
 
   @override
@@ -91,7 +89,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Weekly Workout Plan'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -125,43 +123,85 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   }
 
   Widget _buildWorkoutPlanDisplay(WorkoutResponse response) {
+    final List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoCard('Status', response.status, Colors.green),
-          _buildInfoCard('BMI Category', response.bmiCase, Colors.blue),
-          _buildInfoCard('BFP Category', response.bfpCase, Colors.teal),
-          const SizedBox(height: 20),
-          const Text(
-            'Your workout plan:',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          // Блоки BMI и BFP
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                Expanded(child: _buildInfoCard('BMI', response.bmiCase, Icons.accessibility, _getBMIDescription(response.bmiCase))),
+                const SizedBox(width: 2), // Сокращаем расстояние
+                Expanded(child: _buildInfoCard('BFP', response.bfpCase, Icons.monitor_weight, _getBFPDescription(response.bfpCase))),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
-          ...response.workoutPlan.map((dayPlan) =>
-              _buildDayWorkoutCard(dayPlan)),
+
+          // Заголовок "Your workout plan" и селектор дней в одной карточке
+          _buildDaySelectorCard(weekdays, response.workoutPlan.length),
+          const SizedBox(height: 16),
+
+          // Отображение плана для выбранного дня
+          if (response.workoutPlan.isNotEmpty && _selectedDayIndex < response.workoutPlan.length)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildDayWorkoutCard(response.workoutPlan[_selectedDayIndex]),
+            )
+          else
+            const Center(child: Text('Workout plan for selected day not available.')),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(String title, String value, Color color) {
+  // Новый компактный виджет для отображения BMI/BFP с кнопкой информации
+  Widget _buildInfoCard(String title, String? value, IconData icon, String description) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: color,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 28),
+            const SizedBox(height: 4),
             Text(
-              '$title:',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              title,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-            Text(
-              value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+            const SizedBox(height: 2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // Добавляем MainAxisSize.min
+              children: [
+                Flexible( // Использование Flexible для предотвращения переполнения
+                  child: Text(
+                    value ?? 'N/A',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center, // Центрируем текст
+                  ),
+                ),
+                if (value != null && value != 'N/A')
+                  GestureDetector(
+                    onTap: () {
+                      _showInfoDialog(context, title, description);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4.0), // Отступ для иконки
+                      child: Icon(Icons.info_outline, size: 18, color: Colors.grey[600]),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
@@ -169,10 +209,150 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
     );
   }
 
+  void _showInfoDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: Text(content),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getBMIDescription(String? bmiCase) {
+    switch (bmiCase?.toLowerCase()) {
+      case 'mild thinness':
+        return 'Your BMI is less than 18.5, indicating that you are underweight. This might be due to various factors and could lead to health issues. Consider consulting a healthcare professional or nutritionist.';
+      case 'moderate thinness':
+        return 'Your BMI is between 18.5 and 24.9, which is considered a healthy weight range for your height. Maintain a balanced diet and regular exercise to stay healthy.';
+      case 'normal':
+        return 'Your BMI is between 18.5 and 24.9. This is considered a healthy weight range for your height. Maintain a balanced diet and regular exercise to stay healthy.';
+      case 'overweight':
+        return 'Your BMI is between 25 and 29.9, indicating that you are overweight. This can increase the risk of various health problems. Focus on healthy eating and increased physical activity.';
+      case 'obese':
+        return 'Your BMI is 30 or higher, classifying you as obese. Obesity significantly increases the risk of serious health conditions. It\'s highly recommended to seek professional medical advice for weight management.';
+      case 'sever thinness':
+        return 'Your BMI is 35 or higher, indicating severe obesity. This condition poses serious health risks and requires immediate medical attention. Consult a healthcare professional for a personalized plan.';
+      case 'severe obese':
+        return 'Your BMI is 40 or higher, indicating very severe obesity. This condition poses significant health risks and requires immediate medical attention. Consult a healthcare professional for a personalized plan.';
+      default:
+        return 'BMI (Body Mass Index) is a measure that uses your height and weight to work out if your weight is healthy. It\'s a screening tool, not a diagnostic one. Consult a doctor for personalized advice.';
+    }
+  }
+
+  String _getBFPDescription(String? bfpCase) {
+    switch (bfpCase?.toLowerCase()) {
+      case 'athletes':
+        return 'Body fat percentage typical for athletes. It\'s low but generally healthy for individuals with high levels of physical activity.';
+      case 'fitness':
+        return 'Body fat percentage common among individuals who are in good shape and regularly exercise. It\'s considered healthy and desirable.';
+      case 'acceptable':
+        return 'This range is considered acceptable for most people, representing a moderate amount of body fat. It\'s a healthy range for general population.';
+      case 'obese':
+        return 'Body fat percentage in this range indicates obesity, which significantly increases the risk of various health problems. It is advisable to consult a healthcare professional.';
+      default:
+        return 'BFP (Body Fat Percentage) is the total mass of fat divided by total body mass. It includes essential body fat and storage body fat. Healthy ranges vary by age and gender. Consult a professional for an accurate measurement.';
+    }
+  }
+
+  // Объединенная карточка для заголовка и селектора дней
+  Widget _buildDaySelectorCard(List<String> weekdays, int numberOfDays) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      width: double.infinity, // Расширяем на всю доступную ширину
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 0, 4.0, 8.0),
+            child: Text(
+              'Your workout plan:',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(numberOfDays, (index) {
+                final bool isSelected = _selectedDayIndex == index;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedDayIndex = index;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          weekdays[index % weekdays.length],
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: isSelected
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                          child: Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).textTheme.bodyLarge?.color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDayWorkoutCard(WorkoutPlan dayPlan) {
     return Card(
       elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -181,16 +361,34 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           children: [
             Text(
               'Day ${dayPlan.day}: ${dayPlan.workoutName}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
             ),
             const SizedBox(height: 8),
             Text(
               dayPlan.description,
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey[700]),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic, color: Colors.grey[700]),
             ),
-            const Divider(height: 20, thickness: 1),
-            ...dayPlan.exercises.map((exercise) =>
-                _buildExerciseTile(exercise)),
+            const Divider(height: 24, thickness: 1),
+            // Условие для скрытия упражнений, если workoutName = "Rest or Active Recovery"
+            if (dayPlan.workoutName != "Rest or Active Recovery")
+              ...dayPlan.exercises.map((exercise) => _buildExerciseTile(exercise))
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.self_improvement, size: 40, color: Theme.of(context).primaryColor),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Enjoy your rest or active recovery!',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontStyle: FontStyle.italic, color: Colors.grey[700]),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -199,22 +397,57 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
 
   Widget _buildExerciseTile(Exercise exercise) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            exercise.name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Icon(Icons.fitness_center, color: Theme.of(context).primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  exercise.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
-          Text('Sets: ${exercise.sets}, Reps: ${exercise.reps}'),
-          Text('Goal: ${exercise.target}'),
-          Text('Notes: ${exercise.notes}'),
-          Text('Calories Burned: ${exercise.caloriesBurned.toStringAsFixed(2)}'),
-          if (exercise.caloriesBurned == 0) // Пример выделения
-            const Text(' (Value 0.00 may show on placeholder)', style: TextStyle(color: Colors.orange)),
+          Padding(
+            padding: const EdgeInsets.only(left: 28.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow(Icons.repeat, 'Sets: ${exercise.sets}', context),
+                _buildInfoRow(Icons.directions_run, 'Reps: ${exercise.reps}', context),
+                _buildInfoRow(Icons.flag, 'Goal: ${exercise.target}', context),
+                if (exercise.notes != null && exercise.notes!.isNotEmpty)
+                  _buildInfoRow(Icons.notes, 'Notes: ${exercise.notes}', context),
+                _buildInfoRow(Icons.local_fire_department, 'Calories Burned: ${exercise.caloriesBurned.toStringAsFixed(2)} kcal', context),
+              ],
+            ),
+          ),
           const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: Colors.grey[700]),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
         ],
       ),
     );

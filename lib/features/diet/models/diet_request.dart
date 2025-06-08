@@ -37,6 +37,8 @@ class DietRequest {
       'days': days,
     };
   }
+
+  String toJsonString() => json.encode(toJson());
 }
 
 String dietRequestToJson(DietRequest data) => json.encode(data.toJson());

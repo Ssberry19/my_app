@@ -22,7 +22,7 @@ Future<void> main() async {
 }
 
 final _router = GoRouter(
-  initialLocation: '/welcome', // Стартуем с MainScreen
+  initialLocation: '/main', // Стартуем с MainScreen
   routes: [
     GoRoute(
       path: '/welcome',
