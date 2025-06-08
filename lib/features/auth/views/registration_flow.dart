@@ -155,9 +155,9 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       'goal': _userData.goal?.toString().split('.').last, // Преобразуем Enum в строку
       'activityLevel': _userData.activityLevel?.toString().split('.').last, // Преобразуем Enum в строку
       'allergens': _userData.allergens, // Список аллергенов
-      'cycle_length': _userData.cycleLength, // Используем значение из _userData, если оно есть
-      'last_period_date':  _userData.lastPeriodDate?.toIso8601String().split('T').first,
-      'cycle_day':  _userData.cycleDay,
+      'cycleLength': _userData.cycleLength, // Используем значение из _userData, если оно есть
+      'lastPeriodDate':  _userData.lastPeriodDate?.toIso8601String().split('T').first,
+      'cycleDay':  _userData.cycleDay,
       'email': _userData.email,
       'password': _userData.password,
       // 'confirmPassword' не включаем, так как это поле только для фронтенд-валидации
@@ -168,7 +168,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
         Uri.parse('$backendUrl/api/users/create/'), // Убедитесь, что это ваш реальный эндпоинт для регистрации
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Token $token'
+          // 'Authorization': 'Token $token'
         },
         body: jsonEncode(registrationPayload),
       );

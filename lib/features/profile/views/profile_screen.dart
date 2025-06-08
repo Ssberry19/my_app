@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart'; // Для доступа к
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/profile_data.dart'; // Путь к вашему profile_data.dart
+import '../models/profile_provider.dart'; // Путь к вашему profile_data.dart
 import '../models/user_profile.dart'; // Путь к вашему user_profile.dart
 
 class ProfileScreen extends StatefulWidget {
@@ -151,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           _buildSectionHeader(context, 'Personal info'),
                           // Используем оператор ?? для предоставления значения по умолчанию, если поле null
-                          _buildProfileRow(context, 'Nickname', userProfile.fullName ?? 'Empty', Icons.person),
+                          _buildProfileRow(context, 'Nickname', userProfile.username ?? 'Empty', Icons.person),
                           _buildProfileRow(context, 'Email', userProfile.email ?? 'Empty', Icons.email),
                           _buildProfileRow(context, 'Gender', userProfile.gender ?? 'Empty', Icons.transgender),
                           _buildProfileRow(context, 'Birth Date', userProfile.birthDate?.toIso8601String().split('T').first ?? 'Empty', Icons.calendar_today),
@@ -164,17 +164,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildProfileRow(context, 'Goal', userProfile.goal ?? 'Empty', Icons.track_changes),
                           _buildProfileRow(context, 'Activity level', userProfile.activityLevel ?? 'Empty', Icons.directions_run),
                           
-                          // Правильная обработка menstrualCycles:
                           // Проверяем, что пол женский, и что список циклов не null и не пуст.
-                          if (userProfile.gender == 'female' && userProfile.menstrualCycles != null && userProfile.menstrualCycles!.isNotEmpty) ...[
+                          if (userProfile.gender == 'female') ...[
                             const SizedBox(height: 20),
                             _buildSectionHeader(context, 'Menstrual Cycles'),
-                            // Используем .map для преобразования каждого элемента списка и отображения
-                            ...userProfile.menstrualCycles!.map((date) => _buildProfileRow(context, 'Cycle date', date.toIso8601String().split('T').first, Icons.calendar_month)),
-                          ] else if (userProfile.gender == 'female') ...[
-                             // Если пол женский, но данные о циклах отсутствуют или пусты
-                            const SizedBox(height: 20),
-                            _buildProfileRow(context, 'Menstrual Cycles', 'Cycle data is empty', Icons.calendar_month),
+                          if (userProfile.lastPeriodDate != null && userProfile.cycleDay != null && userProfile.cycleLength != null)
+                              ...[
+                                _buildProfileRow(context, 'Last Period Date', userProfile.lastPeriodDate!.toIso8601String().split('T').first, Icons.calendar_today), // Added null check (!) here
+                                _buildProfileRow(context, 'Cycle length', '${userProfile.cycleLength}', Icons.timelapse),
+                                _buildProfileRow(context, 'Current cycle day', '${userProfile.cycleDay}', Icons.calendar_month),
+                              ]
+                            else
+                              _buildProfileRow(context, 'Menstrual Cycles', 'Cycle data is empty', Icons.calendar_month),
                           ],
 
                           const SizedBox(height: 30),
@@ -186,6 +187,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // TODO: Реализовать навигацию на экран изменения пароля
                             print('Edit Password is tapped');
                           }),
+                          // Добавляем кнопку выхода
+                          _buildListTile(context, 'Logout', Icons.logout, _performLogout),
                         ],
                       ),
                     );

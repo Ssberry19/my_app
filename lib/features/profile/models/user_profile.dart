@@ -36,7 +36,7 @@ class UserProfileResponse {
 
 // Класс для самих данных профиля пользователя
 class UserProfileData {
-  final String? fullName;
+  final String? username;
   final String? gender;
   final DateTime? birthDate;
   final double? height;
@@ -44,11 +44,13 @@ class UserProfileData {
   final double? targetWeight;
   final String? goal;
   final String? activityLevel;
-  final List<DateTime>? menstrualCycles; // Может быть null или отсутствовать
+  int? cycleLength;
+  DateTime? lastPeriodDate;
+  int? cycleDay;
   final String? email;
 
   UserProfileData({
-    this.fullName,
+    this.username,
     this.gender,
     this.birthDate,
     this.height,
@@ -56,13 +58,15 @@ class UserProfileData {
     this.targetWeight,
     this.goal,
     this.activityLevel,
-    this.menstrualCycles,
+    this.lastPeriodDate,
+    this.cycleLength,
+    this.cycleDay,
     this.email,
   });
 
   // Фабричный конструктор для создания объекта из JSON
   factory UserProfileData.fromJson(Map<String, dynamic> json) => UserProfileData(
-        fullName: json["fullName"],
+        username: json["username"],
         gender: json["gender"],
         birthDate: json["birthDate"] != null ? DateTime.parse(json["birthDate"]) : null,
         height: json["height"]?.toDouble(), // Используем ?.toDouble() для безопасного приведения
@@ -71,15 +75,15 @@ class UserProfileData {
         goal: json["goal"],
         activityLevel: json["activityLevel"],
         // Специальная обработка для List<DateTime>
-        menstrualCycles: json["menstrualCycles"] != null
-            ? List<DateTime>.from(json["menstrualCycles"].map((x) => DateTime.parse(x)))
-            : null, // Если ключ отсутствует или значение null, присвоить null
+        lastPeriodDate: json["lastPeriodDate"] != null ? DateTime.parse(json["lastPeriodDate"]) : null,
+        cycleLength: json["cycleLength"],
+        cycleDay: json["cycleDay"],
         email: json["email"],
       );
 
   // Метод для преобразования объекта в JSON
   Map<String, dynamic> toJson() => {
-        "fullName": fullName,
+        "username": username,
         "gender": gender,
         "birthDate": birthDate?.toIso8601String(),
         "height": height,
@@ -87,9 +91,9 @@ class UserProfileData {
         "targetWeight": targetWeight,
         "goal": goal,
         "activityLevel": activityLevel,
-        "menstrualCycles": menstrualCycles != null
-            ? List<dynamic>.from(menstrualCycles!.map((x) => x.toIso8601String()))
-            : null,
+        "lastPeriodDate": lastPeriodDate?.toIso8601String(),
+        "cycleLength": cycleLength, 
+        "cycleDay": cycleDay,
         "email": email,
       };
 }

@@ -1,10 +1,9 @@
-// ignore_for_file: avoid_print
-
+// features/diet/views/diet_screen.dart
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../models/diet_request.dart';
+import 'package:provider/provider.dart'; // Импортируем provider
+import '../models/diet_plan_provider.dart'; // Импортируем DietPlanProvider
+// import '../../profile/models/profile_data.dart'; // Если нужны данные профиля для запроса
 import '../models/diet_response.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DietScreen extends StatefulWidget {
   const DietScreen({super.key});
@@ -14,259 +13,331 @@ class DietScreen extends StatefulWidget {
 }
 
 class _DietScreenState extends State<DietScreen> {
-  DietResponse? _dietResponse;
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  final DietRequest _requestData = DietRequest(
-    heightCm: 175,
-    weightKg: 75,
-    age: 21,
-    gender: "female",
-    goal: "weight_loss",
-    targetWeight: 65.0,
-    activityLevel: "sedentary",
-    allergens: [],
-    days: 7,
-  );
+  int _selectedDayIndex = 0;
+  bool _isSummaryExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchDietPlan();
-  }
-
-  Future<void> _fetchDietPlan() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000';
-    const String endpoint = '/generate-diet';
-    final String apiUrl = '$baseUrl$endpoint';
-    
-    print('Attempting to connect to: $apiUrl');
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: dietRequestToJson(_requestData),
-      );
-
-      if (response.statusCode == 200) {
-        print('Successful API response body: ${response.body}');
-        setState(() {
-          _dietResponse = dietResponseFromJson(response.body);
-        });
-      } else {
-        print('Server error status code: ${response.statusCode}');
-        print('Server error response body: ${response.body}');
-        setState(() {
-          _errorMessage =
-              'Ошибка ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Could not connect to server: $e';
-      });
-      print('Network/Connection error: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    // Нам не нужно вызывать fetchDietPlan здесь, так как он уже вызван в MainScreen
+    // Однако, если вы хотите убедиться, что план загружен (например, при первом запуске
+    // и если пользователь сразу перешел на DietScreen без загрузки MainScreen),
+    // можно добавить Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan();
+    // Но при текущей маршрутизации и логике, когда /main является стартовым после логина/регистрации,
+    // это не обязательно.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weekly Diet Plan'),
-        backgroundColor: Colors.deepPurple,
+        title: const Text('Diet Plan'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            // Вызываем метод forceRefresh из провайдера
+            onPressed: () {
+              Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan(forceRefresh: true);
+            },
+          ),
+        ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Loading error: $_errorMessage',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red, fontSize: 16),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _fetchDietPlan,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
+      body: Consumer<DietPlanProvider>( // Используем Consumer для прослушивания изменений
+        builder: (context, dietPlanProvider, child) {
+          if (dietPlanProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (dietPlanProvider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(dietPlanProvider.errorMessage!),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      dietPlanProvider.fetchDietPlan(forceRefresh: true);
+                    },
+                    child: const Text('Retry'),
                   ),
-                )
-              : _dietResponse == null
-                  ? const Center(child: Text('No diet plan available'))
-                  : _buildDietPlanDisplay(_dietResponse!),
+                ],
+              ),
+            );
+          }
+          if (dietPlanProvider.dietResponse == null) {
+            return const Center(child: Text('No diet plan available'));
+          }
+
+          final DietResponse response = dietPlanProvider.dietResponse!;
+          // Убедимся, что выбранный индекс дня не выходит за пределы,
+          // если количество дней изменилось после обновления
+          if (_selectedDayIndex >= (response.plan.length)) {
+            _selectedDayIndex = 0;
+          }
+          // Оборачиваем весь контент в SingleChildScrollView
+          return SingleChildScrollView(
+            child: _buildDietPlan(response),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildDietPlanDisplay(DietResponse response) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+  Widget _buildDietPlan(DietResponse response) {
+    final List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+          child: _buildSummaryCard(response),
+        ),
+        _buildDaySelectorCard(weekdays, response.plan.length, response),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _buildDaySelectorCard(List<String> weekdays, int numberOfDays, DietResponse response) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Используем оператор ?? для предоставления значения по умолчанию, если поле null
-          _buildInfoCard('Status', response.status ?? 'N/A', Colors.green),
-          _buildInfoCard('BMI Category', response.bmiCase ?? 'N/A', Colors.blue),
-          _buildInfoCard('BFP Category', response.bfpCase ?? 'N/A', Colors.teal),
-          const SizedBox(height: 20),
-          const Text(
-            'Your diet plan:',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 0, 4.0, 8.0),
+            child: Text(
+              'Plan for the week',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+            ),
           ),
-          const SizedBox(height: 10),
-          // Проверяем, что dietPlan не null и не пуст
-          ...(response.dietPlan.isNotEmpty
-              ? response.dietPlan.map((dayPlan) => _buildDayDietCard(dayPlan)).toList()
-              : [const Center(child: Text('Diet plan data is missing or empty.'))]),
-          const SizedBox(height: 20),
-          _buildActionButtons(context),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(numberOfDays, (index) {
+              final bool isSelected = _selectedDayIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDayIndex = index;
+                  });
+                },
+                child: Column(
+                  children: [
+                    Text(
+                      weekdays[index % weekdays.length],
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).textTheme.bodyLarge?.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const Divider(height: 24, thickness: 1),
+
+          Padding(
+            padding: const EdgeInsets.only(bottom: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildMacroItem('Protein', '${response.macronutrientDistribution.proteinPercentage}%', Icons.egg),
+                _buildMacroItem('Carbs', '${response.macronutrientDistribution.carbPercentage}%', Icons.rice_bowl),
+                _buildMacroItem('Fat', '${response.macronutrientDistribution.fatPercentage}%', Icons.oil_barrel),
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.local_fire_department, color: Theme.of(context).primaryColor, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Daily Calories: ${response.dailyCalories} kcal',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const Divider(height: 24, thickness: 1),
+
+          if (response.plan.isNotEmpty && _selectedDayIndex < response.plan.length)
+            _buildDayPlanContent(response.plan[_selectedDayIndex])
+          else
+            const Center(child: Text('Diet plan for selected day not available.')),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(String title, String value, Color color) {
+  Widget _buildSummaryCard(DietResponse response) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: color,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '$title:',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            Text(
-              value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDayDietCard(DietPlan dayPlan) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Используем оператор ?? для безопасного доступа к nullable полям
             Text(
-              'Day ${dayPlan.day}: ${dayPlan.dietName ?? 'No Diet Name'}', // <-- ИСПРАВЛЕНО
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              dayPlan.description ?? 'No description provided.', // <-- ИСПРАВЛЕНО (это строка 89)
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey[700]),
+              'Diet Summary',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const Divider(height: 20, thickness: 1),
-            // Проверяем, что meals не null и не пуст
-            ...(dayPlan.meals.isNotEmpty
-                ? dayPlan.meals.map((meal) => _buildMealTile(meal)).toList()
-                : [const Text('No meals planned for this day.')]),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  response.summary,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: _isSummaryExpanded ? null : 2,
+                  overflow: _isSummaryExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                ),
+                if (response.summary.length > 100)
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isSummaryExpanded = !_isSummaryExpanded;
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      alignment: Alignment.centerLeft,
+                    ),
+                    child: Text(
+                      _isSummaryExpanded ? 'Read less' : 'Read more',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMealTile(Meal meal) {
+  Widget _buildMacroItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Theme.of(context).primaryColor, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDayPlanContent(DayPlan dayPlan) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Day ${dayPlan.day}',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const Divider(height: 20, thickness: 1),
+        ...dayPlan.meals.map((meal) => _buildMealItem(meal)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildMealItem(Meal meal) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Используем оператор ?? для безопасного доступа к nullable полям
-          Text(
-            '${meal.type ?? 'N/A'}: ${meal.name ?? 'No Meal Name'}', // <-- ИСПРАВЛЕНО
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.fastfood, color: Theme.of(context).primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meal.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      meal.description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${meal.calories} kcal',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey[700]),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
-          Text(meal.description ?? 'No description provided.'), // <-- ИСПРАВЛЕНО
-          // Проверяем, что calories не null перед вызовом toStringAsFixed
-          Text('Calories: ${meal.calories?.toStringAsFixed(2) ?? 'N/A'} kcal'),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildCustomButton(
-            context,
-            'Notes',
-            Icons.edit_note,
-          ),
-          _buildCustomButton(
-            context,
-            'BMI',
-            Icons.calculate,
-          ),
-          _buildCustomButton(
-            context,
-            'Log food',
-            Icons.add_box,
+          Padding(
+            padding: const EdgeInsets.only(left: 28.0),
+            child: Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children: [
+                _buildNutritionChip('P: ${meal.proteinG}g'),
+                _buildNutritionChip('C: ${meal.carbsG}g'),
+                _buildNutritionChip('F: ${meal.fatG}g'),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCustomButton(BuildContext context, String text, IconData icon) {
-    return Column(
-      children: [
-        IconButton(
-          icon: Icon(icon, size: 30),
-          color: Theme.of(context).primaryColor,
-          onPressed: () {
-            // Action for button
-          },
-        ),
-        const SizedBox(height: 4),
-        Text(
-          text,
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-      ],
+  Widget _buildNutritionChip(String text) {
+    return Chip(
+      label: Text(text),
+      visualDensity: VisualDensity.compact,
+      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+      labelStyle: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
     );
   }
 }
