@@ -1,8 +1,9 @@
+// features/diet/views/diet_screen.dart
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../models/diet_request.dart';
+import 'package:provider/provider.dart'; // Импортируем provider
+import '../models/diet_plan_provider.dart'; // Импортируем DietPlanProvider
+// import '../../profile/models/profile_data.dart'; // Если нужны данные профиля для запроса
 import '../models/diet_response.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DietScreen extends StatefulWidget {
   const DietScreen({super.key});
@@ -12,74 +13,18 @@ class DietScreen extends StatefulWidget {
 }
 
 class _DietScreenState extends State<DietScreen> {
-  DietResponse? _dietResponse;
-  bool _isLoading = false;
-  String? _errorMessage;
-  int _selectedDayIndex = 0; // Инициализируем выбранный день как первый (День 1)
-  bool _isSummaryExpanded = false; // Состояние для сворачивания/разворачивания текста сводки
-
-  final DietRequest _requestData = DietRequest(
-    heightCm: 175,
-    weightKg: 70,
-    age: 25,
-    gender: "female",
-    goal: "weight_loss",
-    targetWeight: 60.0,
-    activityLevel: "sedentary",
-    allergens: [],
-    days: 7,
-  );
+  int _selectedDayIndex = 0;
+  bool _isSummaryExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchDietPlan();
-  }
-
-  Future<void> _fetchDietPlan() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000';
-    const String endpoint = '/generate-diet';
-    final String apiUrl = '$baseUrl$endpoint';
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: _requestData.toJsonString(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _dietResponse = dietResponseFromJson(response.body);
-          // Убедимся, что выбранный индекс дня не выходит за пределы,
-          // если количество дней изменилось после обновления
-          if (_selectedDayIndex >= (_dietResponse?.plan.length ?? 0)) {
-            _selectedDayIndex = 0;
-          }
-          _isSummaryExpanded = false; // Сбрасываем состояние развернутости при новой загрузке
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Error ${response.statusCode}: ${response.body}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Could not connect to server: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    // Нам не нужно вызывать fetchDietPlan здесь, так как он уже вызван в MainScreen
+    // Однако, если вы хотите убедиться, что план загружен (например, при первом запуске
+    // и если пользователь сразу перешел на DietScreen без загрузки MainScreen),
+    // можно добавить Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan();
+    // Но при текущей маршрутизации и логике, когда /main является стартовым после логина/регистрации,
+    // это не обязательно.
   }
 
   @override
@@ -90,67 +35,74 @@ class _DietScreenState extends State<DietScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchDietPlan,
+            // Вызываем метод forceRefresh из провайдера
+            onPressed: () {
+              Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan(forceRefresh: true);
+            },
           ),
         ],
       ),
-      body: _buildBody(),
-    );
-  }
+      body: Consumer<DietPlanProvider>( // Используем Consumer для прослушивания изменений
+        builder: (context, dietPlanProvider, child) {
+          if (dietPlanProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (dietPlanProvider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(dietPlanProvider.errorMessage!),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      dietPlanProvider.fetchDietPlan(forceRefresh: true);
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (dietPlanProvider.dietResponse == null) {
+            return const Center(child: Text('No diet plan available'));
+          }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_errorMessage!),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _fetchDietPlan,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-    if (_dietResponse == null) {
-      return const Center(child: Text('No diet plan available'));
-    }
-    // Оборачиваем весь контент в SingleChildScrollView
-    return SingleChildScrollView(
-      child: _buildDietPlan(_dietResponse!),
+          final DietResponse response = dietPlanProvider.dietResponse!;
+          // Убедимся, что выбранный индекс дня не выходит за пределы,
+          // если количество дней изменилось после обновления
+          if (_selectedDayIndex >= (response.plan.length)) {
+            _selectedDayIndex = 0;
+          }
+          // Оборачиваем весь контент в SingleChildScrollView
+          return SingleChildScrollView(
+            child: _buildDietPlan(response),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildDietPlan(DietResponse response) {
-    // Список названий дней недели для отображения над кружками
     final List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Карточка сводки диеты
         Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0), // Отступы для Summary
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
           child: _buildSummaryCard(response),
         ),
-        // Объединенная карточка с заголовком "Plan for the week" и селектором дней
-        // а также с макронутриентами и калориями
-        _buildDaySelectorCard(weekdays, response.plan.length, response), // Передаем response целиком
-        const SizedBox(height: 20), // Дополнительный отступ внизу
+        _buildDaySelectorCard(weekdays, response.plan.length, response),
+        const SizedBox(height: 20),
       ],
     );
   }
 
-  // Новый виджет для объединенной карточки с селектором дней, макронутриентами и планом
   Widget _buildDaySelectorCard(List<String> weekdays, int numberOfDays, DietResponse response) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0), // Корректируем внутренние отступы
+      padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.0),
@@ -159,21 +111,20 @@ class _DietScreenState extends State<DietScreen> {
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: const Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Заголовок "Plan for the week" внутри карточки
           Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 0, 4.0, 8.0), // Небольшой отступ от края карточки
+            padding: const EdgeInsets.fromLTRB(4.0, 0, 4.0, 8.0),
             child: Text(
               'Plan for the week',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor, // Красим в фиолетовый
+                    color: Theme.of(context).primaryColor,
                   ),
             ),
           ),
@@ -190,7 +141,7 @@ class _DietScreenState extends State<DietScreen> {
                 child: Column(
                   children: [
                     Text(
-                      weekdays[index % weekdays.length], // Гарантируем, что используем дни недели по кругу
+                      weekdays[index % weekdays.length],
                       style: TextStyle(
                         fontSize: 12,
                         color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium?.color,
@@ -200,14 +151,14 @@ class _DietScreenState extends State<DietScreen> {
                     CircleAvatar(
                       radius: 18,
                       backgroundColor: isSelected
-                          ? Theme.of(context).primaryColor // Цвет для выбранного дня
-                          : Theme.of(context).colorScheme.secondary.withOpacity(0.1), // Цвет для невыбранного
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).colorScheme.secondary.withOpacity(0.1),
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimary // Цвет текста для выбранного дня
-                              : Theme.of(context).textTheme.bodyLarge?.color, // Цвет текста для невыбранного
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).textTheme.bodyLarge?.color,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -217,9 +168,8 @@ class _DietScreenState extends State<DietScreen> {
               );
             }),
           ),
-          const Divider(height: 24, thickness: 1), // Разделитель после селектора дней
+          const Divider(height: 24, thickness: 1),
 
-          // Макронутриенты и калории (перенесены сюда)
           Padding(
             padding: const EdgeInsets.only(bottom: 15.0),
             child: Row(
@@ -242,9 +192,8 @@ class _DietScreenState extends State<DietScreen> {
               ),
             ],
           ),
-          const Divider(height: 24, thickness: 1), // Разделитель перед планом дня
+          const Divider(height: 24, thickness: 1),
 
-          // Отображение плана для выбранного дня
           if (response.plan.isNotEmpty && _selectedDayIndex < response.plan.length)
             _buildDayPlanContent(response.plan[_selectedDayIndex])
           else
@@ -256,8 +205,8 @@ class _DietScreenState extends State<DietScreen> {
 
   Widget _buildSummaryCard(DietResponse response) {
     return Card(
-      elevation: 2, // Добавим тень для соответствия дизайну
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Скруглим углы
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -268,17 +217,15 @@ class _DietScreenState extends State<DietScreen> {
               style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const Divider(height: 20, thickness: 1),
-            // Сворачиваемый текст
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   response.summary,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  maxLines: _isSummaryExpanded ? null : 2, // 2 строки или весь текст
+                  maxLines: _isSummaryExpanded ? null : 2,
                   overflow: _isSummaryExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 ),
-                // Показываем кнопку только если текст длиннее 2 строк
                 if (response.summary.length > 100)
                   TextButton(
                     onPressed: () {
@@ -287,8 +234,8 @@ class _DietScreenState extends State<DietScreen> {
                       });
                     },
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero, // Убираем лишний padding у кнопки
-                      alignment: Alignment.centerLeft, // Выравниваем текст кнопки по левому краю
+                      padding: EdgeInsets.zero,
+                      alignment: Alignment.centerLeft,
                     ),
                     child: Text(
                       _isSummaryExpanded ? 'Read less' : 'Read more',
@@ -306,7 +253,7 @@ class _DietScreenState extends State<DietScreen> {
   Widget _buildMacroItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Theme.of(context).primaryColor, size: 24), // Иконка для макроса
+        Icon(icon, color: Theme.of(context).primaryColor, size: 24),
         const SizedBox(height: 4),
         Text(
           label,
@@ -320,7 +267,6 @@ class _DietScreenState extends State<DietScreen> {
     );
   }
 
-  // Метод для содержимого плана дня (без Card)
   Widget _buildDayPlanContent(DayPlan dayPlan) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,11 +288,11 @@ class _DietScreenState extends State<DietScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // Выравнивание по центру
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.fastfood, color: Theme.of(context).primaryColor, size: 20), // Иконка еды
+              Icon(Icons.fastfood, color: Theme.of(context).primaryColor, size: 20),
               const SizedBox(width: 8),
-              Expanded( // Расширяем Text, чтобы он занимал доступное пространство
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -355,7 +301,7 @@ class _DietScreenState extends State<DietScreen> {
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      meal.description, // Описание блюда
+                      meal.description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                     ),
                   ],
@@ -369,10 +315,10 @@ class _DietScreenState extends State<DietScreen> {
           ),
           const SizedBox(height: 4),
           Padding(
-            padding: const EdgeInsets.only(left: 28.0), // Отступ для чипов
+            padding: const EdgeInsets.only(left: 28.0),
             child: Wrap(
-              spacing: 8.0, // Горизонтальный отступ между чипами
-              runSpacing: 4.0, // Вертикальный отступ между строками чипов
+              spacing: 8.0,
+              runSpacing: 4.0,
               children: [
                 _buildNutritionChip('P: ${meal.proteinG}g'),
                 _buildNutritionChip('C: ${meal.carbsG}g'),
@@ -389,8 +335,8 @@ class _DietScreenState extends State<DietScreen> {
     return Chip(
       label: Text(text),
       visualDensity: VisualDensity.compact,
-      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1), // Полупрозрачный цвет темы
-      labelStyle: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14), // Цвет текста чипа
+      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+      labelStyle: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
     );
   }

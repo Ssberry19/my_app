@@ -1,10 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../models/workout_request.dart';
+import 'package:provider/provider.dart'; // Import provider
+// import '../models/workout_request.dart'; // Keep original import, though not used directly in this file anymore for API calls
 import '../models/workout_response.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart'; // Keep original import, though not used directly in this file anymore for API calls
+import '../models/workout_plan_provider.dart'; // Import the new WorkoutPlanProvider
 
 class WorkoutPlanPage extends StatefulWidget {
   const WorkoutPlanPage({super.key});
@@ -14,74 +15,15 @@ class WorkoutPlanPage extends StatefulWidget {
 }
 
 class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
-  WorkoutResponse? _workoutResponse;
-  bool _isLoading = false;
-  String? _errorMessage;
-  int _selectedDayIndex = 0; // Добавляем состояние для выбранного дня
+  // Removed _workoutResponse, _isLoading, _errorMessage, _requestData
+  // Removed _fetchWorkoutPlan() method
 
-  final WorkoutRequest _requestData = WorkoutRequest(
-    heightCm: 180,
-    weightKg: 80,
-    age: 21,
-    gender: "male",
-    goal: "weight_loss",
-    menstrualPhase: "",
-    bodyFatPercentage: 38.0,
-    days: 7,
-  );
-
-  Future<void> _fetchWorkoutPlan() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final String baseUrl = dotenv.env['FASTAPI_URL'] ?? 'http://127.0.0.1:8000';
-    const String endpoint = '/workout-calories/generate';
-    final String apiUrl = '$baseUrl$endpoint';
-
-    print('Attempting to connect to: $apiUrl');
-    print('ALISHER: ${workoutRequestToJson(_requestData)}');
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: workoutRequestToJson(_requestData),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _workoutResponse = workoutResponseFromJson(response.body);
-          // Сбросим выбранный день, если количество дней изменилось
-          if (_selectedDayIndex >= (_workoutResponse?.workoutPlan.length ?? 0)) {
-            _selectedDayIndex = 0;
-          }
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Ошибка ${response.statusCode}: ${response.reasonPhrase}\n${response.body}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Could not connect to server: $e';
-      });
-      print('Network/Connection error: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+  int _selectedDayIndex = 0; // Сохраняем состояние для выбранного дня
 
   @override
   void initState() {
     super.initState();
-    _fetchWorkoutPlan();
+    // _fetchWorkoutPlan() is now handled by MainScreen's initState
   }
 
   @override
@@ -90,72 +32,91 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       appBar: AppBar(
         title: const Text('Weekly Workout Plan'),
         backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            // Вызываем метод forceRefresh из провайдера
+            onPressed: () {
+              Provider.of<WorkoutPlanProvider>(context, listen: false).fetchWorkoutPlan(forceRefresh: true);
+            },
+          ),
+        ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Loading error: $_errorMessage',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red, fontSize: 16),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _fetchWorkoutPlan,
-                          child: const Text('Retry'),
-                        ),
-                      ],
+      body: Consumer<WorkoutPlanProvider>( // Use Consumer to listen to provider changes
+        builder: (context, workoutPlanProvider, child) {
+          if (workoutPlanProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (workoutPlanProvider.errorMessage != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Loading error: ${workoutPlanProvider.errorMessage}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red, fontSize: 16),
                     ),
-                  ),
-                )
-              : _workoutResponse == null
-                  ? const Center(child: Text('No workout plan available'))
-                  : _buildWorkoutPlanDisplay(_workoutResponse!),
-    );
-  }
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        workoutPlanProvider.fetchWorkoutPlan(forceRefresh: true); // Retry using provider
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          if (workoutPlanProvider.workoutResponse == null || workoutPlanProvider.workoutResponse!.workoutPlan.isEmpty) {
+            return const Center(child: Text('No workout plan available'));
+          }
 
-  Widget _buildWorkoutPlanDisplay(WorkoutResponse response) {
-    final List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          final WorkoutResponse response = workoutPlanProvider.workoutResponse!;
+          // Сбросим выбранный день, если количество дней изменилось после обновления
+          if (_selectedDayIndex >= (response.workoutPlan.length)) {
+            _selectedDayIndex = 0;
+          }
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Блоки BMI и BFP
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildInfoCard('BMI', response.bmiCase, Icons.accessibility, _getBMIDescription(response.bmiCase))),
-                const SizedBox(width: 2), // Сокращаем расстояние
-                Expanded(child: _buildInfoCard('BFP', response.bfpCase, Icons.monitor_weight, _getBFPDescription(response.bfpCase))),
+                // Блоки BMI и BFP
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(child: _buildInfoCard('BMI', response.bmiCase, Icons.accessibility, _getBMIDescription(response.bmiCase))),
+                      const SizedBox(width: 2), // Сокращаем расстояние
+                      Expanded(child: _buildInfoCard('BFP', response.bfpCase, Icons.monitor_weight, _getBFPDescription(response.bfpCase))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Заголовок "Your workout plan" и селектор дней в одной карточке
+                _buildDaySelectorCard(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], response.workoutPlan.length),
+                const SizedBox(height: 16),
+
+                // Отображение плана для выбранного дня
+                if (response.workoutPlan.isNotEmpty && _selectedDayIndex < response.workoutPlan.length)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: _buildDayWorkoutCard(response.workoutPlan[_selectedDayIndex]),
+                  )
+                else
+                  const Center(child: Text('Workout plan for selected day not available.')),
+                const SizedBox(height: 20),
               ],
             ),
-          ),
-          const SizedBox(height: 10),
-
-          // Заголовок "Your workout plan" и селектор дней в одной карточке
-          _buildDaySelectorCard(weekdays, response.workoutPlan.length),
-          const SizedBox(height: 16),
-
-          // Отображение плана для выбранного дня
-          if (response.workoutPlan.isNotEmpty && _selectedDayIndex < response.workoutPlan.length)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: _buildDayWorkoutCard(response.workoutPlan[_selectedDayIndex]),
-            )
-          else
-            const Center(child: Text('Workout plan for selected day not available.')),
-          const SizedBox(height: 20),
-        ],
+          );
+        },
       ),
     );
   }

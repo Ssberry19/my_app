@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart'; // Для доступа к
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/profile_data.dart'; // Путь к вашему profile_data.dart
+import '../models/profile_provider.dart'; // Путь к вашему profile_data.dart
 import '../models/user_profile.dart'; // Путь к вашему user_profile.dart
 
 class ProfileScreen extends StatefulWidget {
