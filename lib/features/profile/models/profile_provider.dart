@@ -70,7 +70,7 @@ class ProfileData extends ChangeNotifier {
     heightCm: height?.toInt() ?? 0, // Преобразуем double в int, если height не null, иначе 0
     weightKg: weight?.toInt() ?? 0,
     age: age ?? 0,
-    gender: gender?.toString().split('.').last ?? 'other', // Преобразуем enum в строку (например, 'male')
+    gender: gender?.toString().split('.').last ?? 'man', // Преобразуем enum в строку (например, 'male')
     goal: goal?.toString().split('.').last ?? 'maintain', // Преобразуем enum в строку (например, 'loseWeight')
     targetWeight: targetWeight ?? 0.0,
     activityLevel: activityLevel?.toString().split('.').last ?? 'sedentary', // Преобразуем enum в строку
