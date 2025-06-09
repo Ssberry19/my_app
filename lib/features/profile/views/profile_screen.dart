@@ -204,13 +204,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
 
                       const SizedBox(height: 30),
-                      _buildListTile(context, 'Edit Profile', Icons.edit, () {
-                        Navigator.push(
+                      _buildListTile(context, 'Edit Profile', Icons.edit, () async {
+                        final result = await Navigator.push<bool>(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const EditProfileScreen(),
                           ),
                         );
+                          // Если данные были обновлены, перезагружаем профиль
+                        if (result == true) {
+                          _fetchUserProfile();
+                        }
                       }),
                       // Добавляем кнопку выхода
                       _buildListTile(
@@ -304,3 +308,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+

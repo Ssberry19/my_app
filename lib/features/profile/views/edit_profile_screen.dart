@@ -169,7 +169,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
 
         // Возвращаемся на предыдущий экран
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       } else {
         // Ошибка на сервере
         throw Exception('Ошибка обновления профиля: ${response.statusCode}');
