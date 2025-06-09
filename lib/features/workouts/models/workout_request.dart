@@ -8,10 +8,9 @@ class WorkoutRequest {
   double heightCm;
   double weightKg;
   String goal;
-  
-    String gender;
-    int age;
-  String menstrualPhase;
+  String gender;
+  int age;
+  String? menstrualPhase;
   double bodyFatPercentage;
   int days;
 
@@ -21,7 +20,7 @@ class WorkoutRequest {
     required this.age,
     required this.gender,
     required this.goal,
-    required this.menstrualPhase,
+    this.menstrualPhase,
     required this.bodyFatPercentage,
     required this.days,
   });
@@ -37,14 +36,20 @@ class WorkoutRequest {
         days: json["days"],
       );
 
-  Map<String, dynamic> toJson() => {
-        "height_cm": heightCm,
-        "weight_kg": weightKg,
-        "age": age,
-        "gender": gender,
-        "goal": goal,
-        "menstrual_phase": menstrualPhase,
-        "body_fat_percentage": bodyFatPercentage,
-        "days": days,
-      };
+  Map<String, dynamic> toJson() {
+    final json = {
+      "height_cm": heightCm,
+      "weight_kg": weightKg,
+      "age": age,
+      "gender": gender,
+      "goal": goal,
+      "body_fat_percentage": bodyFatPercentage,
+      "days": days,
+    };
+    // Добавляем menstrualPhase только если оно не null и не пустое
+    if (menstrualPhase != null && menstrualPhase!.isNotEmpty) {
+      json["menstrual_phase"] = menstrualPhase as Object;
+    }
+    return json;
+  }
 }

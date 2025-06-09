@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http; // Для HTTP-запросов
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Для доступа к .env переменным
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../diet/models/diet_plan_provider.dart';
+import '../../workouts/models/workout_plan_provider.dart';
 import '../models/profile_provider.dart'; // Путь к вашему profile_data.dart
 import '../models/user_profile.dart'; // Путь к вашему user_profile.dart
 
@@ -64,11 +65,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
       if (response.statusCode == 200) {
-        print('Successful profile API response body: ${response.body}');
-        final UserProfileResponse userProfileResponse = userProfileResponseFromJson(response.body);
-        // Обновляем данные в ProfileData (который является ChangeNotifier)
-        profileData.updateUserProfile(userProfileResponse.data);
-      } else {
+  print('Successful profile API response body: ${response.body}');
+  final UserProfileResponse userProfileResponse = userProfileResponseFromJson(response.body);
+  // Обновляем данные в ProfileData (который является ChangeNotifier)
+  profileData.updateUserProfile(userProfileResponse.data);
+
+  // --- ДОБАВЛЕННЫЙ КОД: Загрузка данных для DietPlanProvider и WorkoutPlanProvider ---
+  if (mounted) { // Ensure the widget is still in the tree
+    Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan(context);
+    Provider.of<WorkoutPlanProvider>(context, listen: false).fetchWorkoutPlan(context);
+  }
+  // -------------------------------------------------------------------------------
+
+} else {
         print('Profile fetch error status code: ${response.statusCode}');
         print('Profile fetch error response body: ${response.body}');
         setState(() {

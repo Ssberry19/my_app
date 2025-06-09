@@ -1,4 +1,6 @@
 // lib/providers/diet_plan_provider.dart
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,7 +37,9 @@ class DietPlanProvider extends ChangeNotifier {
       // Получаем данные профиля из Provider
       final profileData = Provider.of<ProfileData>(context, listen: false);
       final DietRequest request = profileData.toDietRequest(); // Преобразуем профиль в DietRequest
+      print("POPA" + request.toJsonString());
 
+      
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {

@@ -2,8 +2,8 @@
 import 'dart:convert';
 
 class DietRequest {
-  final int heightCm;
-  final int weightKg;
+  final double heightCm;
+  final double weightKg;
   final int age;
   final String gender;
   final String goal;

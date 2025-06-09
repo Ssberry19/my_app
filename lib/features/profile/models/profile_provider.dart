@@ -5,8 +5,8 @@ import 'package:my_app/features/diet/models/diet_request.dart'; // Импорт�
 
 // Enum'ы для удобства (если используются в формах ввода)
 enum Gender { male, female }
-enum FitnessGoal { loseWeight, maintain, gainWeight, cutting }
-enum ActivityLevel { sedentary, light, moderate, active, veryActive }
+enum FitnessGoal { loseWeight, maintain, gainWeight }
+enum ActivityLevel { sedentary, light, moderate, high, extreme }
 
 class ProfileData extends ChangeNotifier {
   // Поля для сбора данных в форме (могут быть nullable по умолчанию)
@@ -40,17 +40,28 @@ class ProfileData extends ChangeNotifier {
   // Метод для обновления данных профиля, полученных с бэкенда
   void updateUserProfile(UserProfileData? data) {
     _userProfile = data;
-    // Обновляем локальные поля, если _userProfile не null.
+    print(_userProfile?.toJson()); // Выводим данные профиля в консоль для отладки
+    
     // Это полезно, если вы хотите использовать те же поля для отображения и редактирования.
     if (data != null) {
       username = data.username;
       // Преобразование строки в enum, если есть
       gender = data.gender != null ? Gender.values.firstWhere((e) => e.toString().split('.').last == data.gender, orElse: () => Gender.male) : null;
+      
+      print("ЕБАНЫЙ ГЕНДЕР");
+      print(gender);
+      
       birthDate = data.birthDate;
       height = data.height;
       weight = data.weight;
       targetWeight = data.targetWeight;
-      goal = data.goal != null ? FitnessGoal.values.firstWhere((e) => e.toString().split('.').last == data.goal, orElse: () => FitnessGoal.maintain) : null;
+      // if (goal = data.goal;)
+      // != null ? FitnessGoal.values.firstWhere((e) => e.toString().split('.').last == data.goal, orElse: () => FitnessGoal.maintain) : null;
+      
+      print("ЕБАНЫЙ ЦЕЛЬ");
+      print(data.goal);
+      print(FitnessGoal.values);
+
       activityLevel = data.activityLevel != null ? ActivityLevel.values.firstWhere((e) => e.toString().split('.').last == data.activityLevel, orElse: () => ActivityLevel.sedentary) : null;
       cycleLength = data.cycleLength; // Используем значение из _userData, если оно есть
       lastPeriodDate = data.lastPeriodDate;
@@ -65,13 +76,15 @@ class ProfileData extends ChangeNotifier {
     notifyListeners(); // Уведомляем слушателей об изменении данных
   }
 
+  
+
   DietRequest toDietRequest() {
   return DietRequest(
-    heightCm: height?.toInt() ?? 0, // Преобразуем double в int, если height не null, иначе 0
-    weightKg: weight?.toInt() ?? 0,
+    heightCm: height ?? 0, // Преобразуем double в int, если height не null, иначе 0
+    weightKg: weight ?? 0,
     age: age ?? 0,
-    gender: gender?.toString().split('.').last ?? 'man', // Преобразуем enum в строку (например, 'male')
-    goal: goal?.toString().split('.').last ?? 'maintain', // Преобразуем enum в строку (например, 'loseWeight')
+    gender: gender?.toString().split('.').last ?? 'male', // Преобразуем enum в строку (например, 'male')
+    goal: goal?.toString().split('.').last ?? 'weight_loss', // Преобразуем enum в строку (например, 'loseWeight')
     targetWeight: targetWeight ?? 0.0,
     activityLevel: activityLevel?.toString().split('.').last ?? 'sedentary', // Преобразуем enum в строку
     allergens: allergens ?? [], // Используем пустой список, если allergens null

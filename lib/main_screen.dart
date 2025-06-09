@@ -31,10 +31,10 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     // Откладываем вызов fetchDietPlan на следующий кадр
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan();
-      Provider.of<WorkoutPlanProvider>(context, listen: false).fetchWorkoutPlan();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan(context);
+    //   Provider.of<WorkoutPlanProvider>(context, listen: false).fetchWorkoutPlan(context);
+    // });
   }
 
   @override
