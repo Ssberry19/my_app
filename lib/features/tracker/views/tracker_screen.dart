@@ -42,11 +42,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
             _buildCalendarSection(context), // Передаем context
             const SizedBox(height: 20),
             _buildWeightProgressChart(), 
-            const SizedBox(height: 20),
-            _buildNotesSection(context), // Передаем context
-            const SizedBox(height: 20),
-            _buildSymptomsMonitor(context), // Передаем context
-          ],
+          ]
         ),
       ),
     );
@@ -253,76 +249,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ][month - 1];
-  }
-
-  Widget _buildNotesSection(BuildContext context) {
-    // Card автоматически возьмет стиль из theme.dart
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildSectionHeader(context, 'Notes'), // Передаем context
-            const Divider(color: Colors.deepPurple), // Цвет из темы
-            TextFormField(
-              maxLines: 4,
-              decoration: const InputDecoration(
-                hintText: 'Add your notes...',
-                // Остальные стили берутся из InputDecorationTheme в theme.dart
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Save notes
-              },
-              // Стиль берется из ElevatedButtonThemeData в theme.dart
-              child: const Text('Save note'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSymptomsMonitor(BuildContext context) {
-    // Card автоматически возьмет стиль из theme.dart
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildSectionHeader(
-              context,
-              'Symptom tracking',
-            ), // Передаем context
-            const Divider(color: Colors.deepPurple), // Цвет из темы
-            _buildSymptomItem(context, 'Headache', Icons.healing),
-            _buildSymptomItem(context, 'Fatigue', Icons.nightlight_round),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSymptomItem(BuildContext context, String text, IconData icon) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: Theme.of(context).iconTheme.color,
-      ), // Цвет иконки из темы
-      title: Text(
-        text,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ), // Стиль из темы
-      trailing: Switch(
-        // activeColor: Colors.deepPurple, // Удаляем, берется из темы SwitchThemeData
-        value: false, // You might want to manage this state
-        onChanged: (value) {
-          // TODO: Handle switch state change
-        },
-      ),
-    );
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {

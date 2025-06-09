@@ -1,7 +1,9 @@
 // models/profile_data.dart
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'user_profile.dart'; // Импортируем новую модель UserProfileData
-import 'package:my_app/features/diet/models/diet_request.dart'; // Импортируем модель DietRequest
+// import 'package:my_app/features/diet/models/diet_request.dart'; // Импортируем модель DietRequest
 
 // Enum'ы для удобства (если используются в формах ввода)
 enum Gender { male, female }

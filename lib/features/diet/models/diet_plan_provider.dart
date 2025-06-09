@@ -51,7 +51,7 @@ class DietPlanProvider extends ChangeNotifier {
         );
 
 
-      print("POPA" + request.toJsonString());
+      // print("POPA" + request.toJsonString());
 
       
       final response = await http.post(
