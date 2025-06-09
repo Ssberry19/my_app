@@ -182,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             'Dietary Allergens',
                             userProfile.allergens != null && userProfile.allergens!.isNotEmpty
                                 ? userProfile.allergens!.join(', ') // Joins the list of strings with a comma and space
-                                : 'None', // Display 'None' if the list is null or empty
+                                : 'none', // Display 'None' if the list is null or empty
                             Icons.restaurant_menu,
                           ),
                           // Проверяем, что пол женский, и что список циклов не null и не пуст.

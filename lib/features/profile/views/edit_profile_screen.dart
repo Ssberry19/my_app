@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -124,11 +126,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'email': _emailController.text,
         'height': double.tryParse(_heightController.text),
         'weight': double.tryParse(_weightController.text),
-        'activity_level': _selectedActivityLevel?.toString().split('.').last,
-        'target_weight': double.tryParse(_targetWeightController.text),
+        'activityLevel': _selectedActivityLevel?.toString().split('.').last,
+        'targetWeight': double.tryParse(_targetWeightController.text),
         'goal': _selectedGoal?.toString().split('.').last,
-        'cycle_length': int.tryParse(_cycleLengthController.text),
-        'last_period_date': _selectedLastPeriodDate?.toIso8601String(),
+        'cycleLength': int.tryParse(_cycleLengthController.text),
+        'lastPeriodDate': _selectedLastPeriodDate?.toIso8601String(),
       };
 
       print("body");
@@ -295,11 +297,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     case ActivityLevel.moderate:
                       displayText = 'Moderate Activity';
                       break;
-                    case ActivityLevel.active:
-                      displayText = 'Active';
+                    case ActivityLevel.high:
+                      displayText = 'High Activity';
                       break;
-                    case ActivityLevel.veryActive:
-                      displayText = 'Very Active';
+                    case ActivityLevel.extreme:
+                      displayText = 'Extremely Active';
                       break;
                   }
                   return DropdownMenuItem(
@@ -361,9 +363,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       break;
                     case FitnessGoal.gainWeight:
                       displayText = 'Gain Weight';
-                      break;
-                    case FitnessGoal.cutting:
-                      displayText = 'Cutting';
                       break;
                   }
                   return DropdownMenuItem(
