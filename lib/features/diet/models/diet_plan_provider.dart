@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/diet_request.dart';
 import '../models/diet_response.dart';
+import 'package:my_app/features/profile/models/profile_provider.dart';
+import 'package:provider/provider.dart'; // Для работы с JSON
 
 class DietPlanProvider extends ChangeNotifier {
   DietResponse? _dietResponse;
@@ -14,21 +16,7 @@ class DietPlanProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // Данные запроса, которые будут использоваться для генерации плана
-  // В реальном приложении эти данные должны приходить из профиля пользователя
-  final DietRequest _requestData = DietRequest(
-    heightCm: 175,
-    weightKg: 70,
-    age: 25,
-    gender: "female",
-    goal: "weight_loss",
-    targetWeight: 60.0,
-    activityLevel: "sedentary",
-    allergens: [],
-    days: 7,
-  );
-
-  Future<void> fetchDietPlan({bool forceRefresh = false}) async {
+  Future<void> fetchDietPlan(BuildContext context, {bool forceRefresh = false}) async {
     // Если данные уже есть и не требуется принудительное обновление, просто выходим
     if (_dietResponse != null && !forceRefresh && !_isLoading) {
       return;
@@ -43,13 +31,18 @@ class DietPlanProvider extends ChangeNotifier {
     final String apiUrl = '$baseUrl$endpoint';
 
     try {
+
+      // Получаем данные профиля из Provider
+      final profileData = Provider.of<ProfileData>(context, listen: false);
+      final DietRequest request = profileData.toDietRequest(); // Преобразуем профиль в DietRequest
+
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: _requestData.toJsonString(),
+        body: request.toJsonString(),
       );
 
       if (response.statusCode == 200) {

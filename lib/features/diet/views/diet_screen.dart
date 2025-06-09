@@ -39,7 +39,7 @@ class _DietScreenState extends State<DietScreen> {
             icon: const Icon(Icons.refresh),
             // Вызываем метод forceRefresh из провайдера
             onPressed: () {
-              Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan(forceRefresh: true);
+              Provider.of<DietPlanProvider>(context, listen: false).fetchDietPlan(context, forceRefresh: true);
             },
           ),
         ],
@@ -58,7 +58,7 @@ class _DietScreenState extends State<DietScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      dietPlanProvider.fetchDietPlan(forceRefresh: true);
+                      dietPlanProvider.fetchDietPlan(context, forceRefresh: true);
                     },
                     child: const Text('Retry'),
                   ),
