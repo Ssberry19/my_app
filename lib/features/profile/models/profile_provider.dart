@@ -1,6 +1,7 @@
 // models/profile_data.dart
 import 'package:flutter/material.dart';
 import 'user_profile.dart'; // Импортируем новую модель UserProfileData
+import 'package:my_app/features/diet/models/diet_request.dart'; // Импортируем модель DietRequest
 
 // Enum'ы для удобства (если используются в формах ввода)
 enum Gender { male, female }
@@ -63,6 +64,20 @@ class ProfileData extends ChangeNotifier {
     }
     notifyListeners(); // Уведомляем слушателей об изменении данных
   }
+
+  DietRequest toDietRequest() {
+  return DietRequest(
+    heightCm: height?.toInt() ?? 0, // Преобразуем double в int, если height не null, иначе 0
+    weightKg: weight?.toInt() ?? 0,
+    age: age ?? 0,
+    gender: gender?.toString().split('.').last ?? 'other', // Преобразуем enum в строку (например, 'male')
+    goal: goal?.toString().split('.').last ?? 'maintain', // Преобразуем enum в строку (например, 'loseWeight')
+    targetWeight: targetWeight ?? 0.0,
+    activityLevel: activityLevel?.toString().split('.').last ?? 'sedentary', // Преобразуем enum в строку
+    allergens: allergens ?? [], // Используем пустой список, если allergens null
+    days: 7, // Можно оставить фиксированным или добавить поле в профиль
+  );
+}
 
   void clearUserProfile() {
     _userProfile = null; // Очищаем данные профиля
