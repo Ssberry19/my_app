@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http; // Для HTTP-запросов
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Для доступа к .env переменным
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'edit_profile_screen.dart'; // Добавьте эту строку в импорты
 import '../models/profile_provider.dart'; // Путь к вашему profile_data.dart
 import '../models/user_profile.dart'; // Путь к вашему user_profile.dart
 
@@ -203,18 +203,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildProfileRow(context, 'Menstrual Cycles', 'Cycle data is empty', Icons.calendar_month),
                           ],
 
-                          const SizedBox(height: 30),
-                          _buildListTile(context, 'Edit Profile', Icons.edit, () {
-                            // TODO: Реализовать навигацию на экран редактирования профиля
-                            print('Edit Profile is tapped');
-                          }),
-                          // Добавляем кнопку выхода
-                          _buildListTile(context, 'Logout', Icons.logout, _performLogout),
-                        ],
+                      const SizedBox(height: 30),
+                      _buildListTile(context, 'Edit Profile', Icons.edit, () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfileScreen(),
+                          ),
+                        );
+                      }),
+                      // Добавляем кнопку выхода
+                      _buildListTile(
+                        context,
+                        'Logout',
+                        Icons.logout,
+                        _performLogout,
                       ),
-                    );
-                  },
-                ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 
