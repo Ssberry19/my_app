@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+// import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:my_app/features/diet/views/diet_screen.dart';
 import 'package:my_app/features/workouts/views/workouts_screen.dart';
-import 'package:my_app/features/tracker/views/tracker_screen.dart';
+// import 'package:my_app/features/tracker/views/tracker_screen.dart';
 import 'package:my_app/features/diet/models/diet_plan_provider.dart';
 import 'package:my_app/features/workouts/models/workout_plan_provider.dart';
 import 'package:my_app/features/diet/models/diet_response.dart';
@@ -223,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 value: value / 100,
                 strokeWidth: 8,
                 color: Theme.of(context).primaryColor,
-                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                backgroundColor: Theme.of(context).primaryColor,
               ),
             ),
             Center(
@@ -278,11 +278,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           children: [
             Expanded(
-              child: _buildStatItem(context, 'BMI', response.bmiCase ?? 'N/A', Icons.accessibility),
+              child: _buildStatItem(context, 'BMI', response.bmiCase, Icons.accessibility),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildStatItem(context, 'BFP', response.bfpCase ?? 'N/A', Icons.monitor_weight),
+              child: _buildStatItem(context, 'BFP', response.bfpCase, Icons.monitor_weight),
             ),
           ],
         ),
@@ -327,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       title: 'Next Meals',
       children: [
-        ...currentDay.meals.take(3).map((meal) => _buildMealItem(context, meal)).toList(),
+        ...currentDay.meals.take(3).map((meal) => _buildMealItem(context, meal)),
       ],
     );
   }

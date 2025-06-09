@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
-import 'package:provider/provider.dart';
-import 'package:my_app/features/diet/models/diet_plan_provider.dart';
-import 'package:my_app/features/workouts/models/workout_plan_provider.dart';
+// import 'package:provider/provider.dart';
+// import 'package:my_app/features/diet/models/diet_plan_provider.dart';
+// import 'package:my_app/features/workouts/models/workout_plan_provider.dart';
 import 'package:my_app/features/profile/views/edit_profile_screen.dart';
 
 // Обновленная модель данных для трекера, чтобы хранить детали для каждой тренировки/приема пищи
