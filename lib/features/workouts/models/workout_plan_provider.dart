@@ -38,15 +38,15 @@ class WorkoutPlanProvider extends ChangeNotifier {
       heightCm: (profileData.height ?? 0) > 0 ? profileData.height! : 170, // Дефолтное значение
       weightKg: (profileData.weight ?? 0) > 0 ? profileData.weight! : 70,
       age: profileData.age ?? 25,
-      gender: profileData.gender?.toString().split('.').last ?? 'male', // "male" или "female"
-      goal: profileData.goal?.toString().split('.').last ?? 'weight_loss',
+      gender: 'female', // "male" или "female"
+      goal: 'weight_loss',
       menstrualPhase: profileData.menstrualPhase?.isNotEmpty == true 
           ? profileData.menstrualPhase!
           : 'none', // Замените 'none' на допустимое значение для бэкенда
       bodyFatPercentage: (profileData.bfp ?? 0) > 0 ? profileData.bfp! : 20.0,
       days: 7,
     );
-  
+
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {'Content-Type': 'application/json'},

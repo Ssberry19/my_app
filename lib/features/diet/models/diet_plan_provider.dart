@@ -36,7 +36,21 @@ class DietPlanProvider extends ChangeNotifier {
 
       // Получаем данные профиля из Provider
       final profileData = Provider.of<ProfileData>(context, listen: false);
-      final DietRequest request = profileData.toDietRequest(); // Преобразуем профиль в DietRequest
+  //     final DietRequest request = profileData.toDietRequest(); // Преобразуем профиль в DietRequest
+ 
+      final DietRequest request = DietRequest(
+        heightCm: (profileData.height ?? 0) > 0 ? profileData.height! : 170, // Дефолтное значение
+        weightKg: (profileData.weight ?? 0) > 0 ? profileData.weight! : 70,
+        age: profileData.age ?? 25,
+        gender: "female",
+        goal: "weight_loss", // Замените на нужную цель
+        targetWeight: (profileData.targetWeight ?? 0) > 0 ? profileData.targetWeight! : 65.0, // Дефолтное значение
+        activityLevel: profileData.activityLevel?.toString().split('.').last ?? 'sedentary', // Преобразуем enum в строку
+        allergens: profileData.allergens ?? [], // Используем пустой список, если allergens null
+        days: 7, // Количество дней для плана питания
+        );
+
+
       print("POPA" + request.toJsonString());
 
       
@@ -46,7 +60,8 @@ class DietPlanProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: request.toJsonString(),
+        body: dietRequestToJson(request), // Преобразуем запрос в JSON
+    
       );
 
       if (response.statusCode == 200) {

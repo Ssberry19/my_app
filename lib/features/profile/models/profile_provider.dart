@@ -46,7 +46,7 @@ class ProfileData extends ChangeNotifier {
     if (data != null) {
       username = data.username;
       // Преобразование строки в enum, если есть
-      gender = data.gender != null ? Gender.values.firstWhere((e) => e.toString().split('.').last == data.gender, orElse: () => Gender.male) : null;
+      gender = Gender.female;
       
       print("ЕБАНЫЙ ГЕНДЕР");
       print(gender);
@@ -55,7 +55,7 @@ class ProfileData extends ChangeNotifier {
       height = data.height;
       weight = data.weight;
       targetWeight = data.targetWeight;
-      // if (goal = data.goal;)
+      goal = FitnessGoal.loseWeight;
       // != null ? FitnessGoal.values.firstWhere((e) => e.toString().split('.').last == data.goal, orElse: () => FitnessGoal.maintain) : null;
       
       print("ЕБАНЫЙ ЦЕЛЬ");
@@ -78,19 +78,19 @@ class ProfileData extends ChangeNotifier {
 
   
 
-  DietRequest toDietRequest() {
-  return DietRequest(
-    heightCm: height ?? 0, // Преобразуем double в int, если height не null, иначе 0
-    weightKg: weight ?? 0,
-    age: age ?? 0,
-    gender: gender?.toString().split('.').last ?? 'male', // Преобразуем enum в строку (например, 'male')
-    goal: goal?.toString().split('.').last ?? 'weight_loss', // Преобразуем enum в строку (например, 'loseWeight')
-    targetWeight: targetWeight ?? 0.0,
-    activityLevel: activityLevel?.toString().split('.').last ?? 'sedentary', // Преобразуем enum в строку
-    allergens: allergens ?? [], // Используем пустой список, если allergens null
-    days: 7, // Можно оставить фиксированным или добавить поле в профиль
-  );
-}
+//   DietRequest toDietRequest() {
+//   return DietRequest(
+//     heightCm: height ?? 0, // Преобразуем double в int, если height не null, иначе 0
+//     weightKg: weight ?? 0,
+//     age: age ?? 0,
+//     gender: gender?.toString().split('.').last ?? 'male', // Преобразуем enum в строку (например, 'male')
+//     goal: goal?.toString().split('.').last ?? 'weight_loss', // Преобразуем enum в строку (например, 'loseWeight')
+//     targetWeight: targetWeight ?? 0.0,
+//     activityLevel: activityLevel?.toString().split('.').last ?? 'sedentary', // Преобразуем enum в строку
+//     allergens: allergens ?? [], // Используем пустой список, если allergens null
+//     days: 7, // Можно оставить фиксированным или добавить поле в профиль
+//   );
+// }
 
   void clearUserProfile() {
     _userProfile = null; // Очищаем данные профиля
