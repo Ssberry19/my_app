@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http; // Для HTTP-запросов
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Для доступа к .env переменным
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'edit_profile_screen.dart'; // Добавьте эту строку в импортыimport '../../diet/models/diet_plan_provider.dart';
 import '../../diet/models/diet_plan_provider.dart';
 import '../../workouts/models/workout_plan_provider.dart';
 import '../models/profile_provider.dart'; // Путь к вашему profile_data.dart
@@ -51,6 +52,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Пример получения токена, если он сохранен в SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token'); // Ключ, по которому вы сохраняете токен
+      
+      // bla bla bla
 
       // Вам может потребоваться токен аутентификации здесь,
       // если ваш FastAPI эндпоинт защищен (например, 'Authorization': 'Bearer YOUR_AUTH_TOKEN').
@@ -210,18 +213,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildProfileRow(context, 'Menstrual Cycles', 'Cycle data is empty', Icons.calendar_month),
                           ],
 
-                          const SizedBox(height: 30),
-                          _buildListTile(context, 'Edit Profile', Icons.edit, () {
-                            // TODO: Реализовать навигацию на экран редактирования профиля
-                            print('Edit Profile is tapped');
-                          }),
-                          // Добавляем кнопку выхода
-                          _buildListTile(context, 'Logout', Icons.logout, _performLogout),
-                        ],
+                      const SizedBox(height: 30),
+                      _buildListTile(context, 'Edit Profile', Icons.edit, () async {
+                        final result = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfileScreen(),
+                          ),
+                        );
+                          // Если данные были обновлены, перезагружаем профиль
+                        if (result == true) {
+                          _fetchUserProfile();
+                        }
+                      }),
+                      // Добавляем кнопку выхода
+                      _buildListTile(
+                        context,
+                        'Logout',
+                        Icons.logout,
+                        _performLogout,
                       ),
-                    );
-                  },
-                ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 
@@ -302,3 +318,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+
