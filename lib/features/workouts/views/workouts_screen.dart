@@ -37,7 +37,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
             icon: const Icon(Icons.refresh),
             // Вызываем метод forceRefresh из провайдера
             onPressed: () {
-              Provider.of<WorkoutPlanProvider>(context, listen: false).fetchWorkoutPlan(forceRefresh: true);
+              Provider.of<WorkoutPlanProvider>(context, listen: false).fetchWorkoutPlan(context, forceRefresh: true);
             },
           ),
         ],
@@ -64,7 +64,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        workoutPlanProvider.fetchWorkoutPlan(forceRefresh: true); // Retry using provider
+                        workoutPlanProvider.fetchWorkoutPlan(context, forceRefresh: true); // Retry using provider
                       },
                       child: const Text('Retry'),
                     ),
